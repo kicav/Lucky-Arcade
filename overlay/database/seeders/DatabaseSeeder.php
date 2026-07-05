@@ -61,6 +61,18 @@ class DatabaseSeeder extends Seeder
             ],
         );
 
+        Game::query()->updateOrCreate(
+            ['code' => 'slots'],
+            [
+                'name' => 'Lucky Slots',
+                'description' => 'Spin three deterministic reels with transparent virtual-credit payouts.',
+                'enabled' => true,
+                'min_bet' => 10,
+                'max_bet' => 1000,
+                'config' => ['reels' => 3, 'paytable' => 'v1'],
+            ],
+        );
+
         $this->seedUser('Administrator', 'admin@example.com', 'ChangeMe123!', true, 100000);
         $this->seedUser('Demo Player', 'demo@example.com', 'Demo123!', false, 10000);
     }

@@ -24,6 +24,10 @@ use App\Http\Controllers\LedgerExportController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReferralController;
 use App\Http\Controllers\RouletteController;
+use App\Http\Controllers\SlotsController;
+use App\Http\Controllers\MissionController;
+use App\Http\Controllers\PlayerStatsController;
+use App\Http\Controllers\Admin\AnnouncementController as AdminAnnouncementController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
@@ -50,6 +54,9 @@ Route::middleware(['auth', 'active'])->group(function (): void {
 
     Route::get('/achievements', AchievementController::class)->name('achievements.index');
     Route::get('/referrals', ReferralController::class)->name('referrals.index');
+    Route::get('/missions', [MissionController::class, 'index'])->name('missions.index');
+    Route::post('/missions/{mission}/claim', [MissionController::class, 'claim'])->middleware('throttle:10,1')->name('missions.claim');
+    Route::get('/stats', PlayerStatsController::class)->name('stats.index');
 
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
@@ -60,6 +67,7 @@ Route::middleware(['auth', 'active'])->group(function (): void {
     Route::post('/games/{game}/roulette', [RouletteController::class, 'store'])->middleware('throttle:30,1')->name('games.roulette.play');
     Route::post('/games/{game}/coinflip', [CoinFlipController::class, 'store'])->middleware('throttle:30,1')->name('games.coinflip.play');
     Route::post('/games/{game}/highlow', [HighLowController::class, 'store'])->middleware('throttle:30,1')->name('games.highlow.play');
+    Route::post('/games/{game}/slots', [SlotsController::class, 'store'])->middleware('throttle:30,1')->name('games.slots.play');
 
     Route::get('/fairness', [FairnessController::class, 'show'])->name('fairness.show');
     Route::post('/fairness/rotate', [FairnessController::class, 'rotate'])->middleware('throttle:5,1')->name('fairness.rotate');
@@ -78,4 +86,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::post('/users/{user}/grant', [AdminUserActionController::class, 'grant'])->middleware('throttle:10,1')->name('users.grant');
     Route::get('/entries', [AdminEntryController::class, 'index'])->name('entries.index');
     Route::get('/audit-logs', [AdminAuditLogController::class, 'index'])->name('audit.index');
+    Route::get('/announcements', [AdminAnnouncementController::class, 'index'])->name('announcements.index');
+    Route::post('/announcements', [AdminAnnouncementController::class, 'store'])->name('announcements.store');
+    Route::put('/announcements/{announcement}', [AdminAnnouncementController::class, 'update'])->name('announcements.update');
+    Route::delete('/announcements/{announcement}', [AdminAnnouncementController::class, 'destroy'])->name('announcements.destroy');
 });

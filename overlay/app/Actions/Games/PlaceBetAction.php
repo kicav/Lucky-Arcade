@@ -13,6 +13,7 @@ use App\Models\Wallet;
 use App\Services\AchievementService;
 use App\Services\FairnessSeedService;
 use App\Services\GameEngineRegistry;
+use App\Services\MissionService;
 use App\Services\ReferralRewardService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -24,6 +25,7 @@ final class PlaceBetAction
         private readonly FairnessSeedService $seeds,
         private readonly ReferralRewardService $referrals,
         private readonly AchievementService $achievements,
+        private readonly MissionService $missions,
     ) {
     }
 
@@ -132,6 +134,7 @@ final class PlaceBetAction
 
             $this->referrals->awardForFirstPlay($lockedUser, $wallet, $entry);
             $this->achievements->evaluateAfterPlay($lockedUser, $wallet);
+            $this->missions->recordPlay($lockedUser);
 
             $seed->increment('nonce');
 

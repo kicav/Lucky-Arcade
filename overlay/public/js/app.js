@@ -43,6 +43,12 @@
 
 
 
+
+        const slotMachine = document.querySelector('.js-slots.slots-settled');
+        if (slotMachine) {
+            requestAnimationFrame(() => slotMachine.classList.add('spin-complete'));
+        }
+
         const coin = document.querySelector('.js-coin.coin-settled');
         if (coin) {
             requestAnimationFrame(() => coin.classList.add('flip-complete'));

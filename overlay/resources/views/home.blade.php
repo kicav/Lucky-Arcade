@@ -5,7 +5,7 @@
     <div>
         <span class="eyebrow">OPEN-SOURCE SOCIAL GAMING</span>
         <h1>Transparent games with virtual credits.</h1>
-        <p>Play Dice, European Roulette, Coin Flip and High Low, inspect your seed hash and verify every historical result after rotating the seed.</p>
+        <p>Play Dice, European Roulette, Coin Flip, High Low and Lucky Slots, inspect your seed hash and verify every historical result after rotating the seed.</p>
         @auth
             <a class="button" href="{{ route('games.index') }}">Open game lobby</a>
         @else
@@ -23,7 +23,8 @@
 <div class="grid cards">
     @foreach($games as $game)
         <article class="card">
-            <div class="game-icon">{{ $game->code === 'dice' ? '⚄' : '◉' }}</div>
+            @php($icon = match($game->code) {'dice' => '⚄', 'roulette' => '◉', 'coinflip' => 'H/T', 'highlow' => 'A↕', 'slots' => '777', default => '◆'})
+            <div class="game-icon">{{ $icon }}</div>
             <h3>{{ $game->name }}</h3>
             <p>{{ $game->description }}</p>
             <small>{{ number_format($game->min_bet) }}–{{ number_format($game->max_bet) }} credits</small>

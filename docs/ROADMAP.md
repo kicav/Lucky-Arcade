@@ -1,24 +1,23 @@
 # Roadmap
 
-## Hoàn thành đến v0.4
+## Hoàn thành đến v0.5
 
 - Auth, wallet ledger, player/admin dashboard.
-- Dice, European Roulette, Coin Flip và High Low.
+- Dice, European Roulette, Coin Flip, High Low và Lucky Slots.
 - Provably-fair seed rotation và historical verification.
-- Daily reward, leaderboard, CSV export và wallet reconciliation.
+- Daily reward, missions, leaderboard, CSV export và wallet reconciliation.
 - Responsible-play controls, notifications và admin player operations.
-- Referral reward có điều kiện first-play.
-- Achievement/progression.
-- Admin analytics.
+- Referral reward, achievement/progression và player statistics.
+- Admin analytics, announcements, audit và SQLite backup command.
 
 ## Phase tiếp theo
 
 - Xác minh email và reset password.
 - 2FA bắt buộc cho admin.
 - Granular admin roles và permissions.
-- PostgreSQL deployment, Redis queue/cache/lock và backup tự động.
-- Health endpoint, structured logging và error tracking.
-- Browser end-to-end tests và load/concurrency tests.
+- PostgreSQL deployment, Redis queue/cache/lock và backup ngoài máy chủ.
+- Health dashboard, structured logging và error tracking.
+- Browser end-to-end tests, load test và concurrency test.
 - Đa ngôn ngữ Việt/Anh.
 - Tournament bằng credit ảo và leaderboard theo mùa.
 

@@ -1,44 +1,24 @@
-# Chạy trên GitHub Codespaces
+# Chạy Lucky Arcade v0.5 trên cloud
 
-Repository sử dụng image PHP 8.3 chính thức và không cần cài PHP/Composer trên Windows.
+## Phát triển
 
-## Tạo Codespace
-
-1. Đảm bảo repository có `.devcontainer/devcontainer.json`.
-2. Chọn **Code → Codespaces → Create codespace on main**.
-3. Kiểm tra:
-
-```bash
-php -v
-composer --version
-php -m | grep -Ei 'pdo_sqlite|sqlite3'
-```
-
-4. Cài mới:
+Dùng GitHub Codespaces và SQLite:
 
 ```bash
 bash setup-linux.sh
 bash run-codespaces.sh
 ```
 
-Hoặc nâng cấp:
+## Hosting liên tục
 
-```bash
-bash upgrade-v0.4.sh
-bash run-codespaces.sh
-```
+Không dùng Codespaces như production host. Khi triển khai lâu dài:
 
-## Mở website
+1. Chuyển database sang PostgreSQL.
+2. Đặt `APP_ENV=production`, `APP_DEBUG=false`.
+3. Dùng Redis cho cache, queue và distributed lock.
+4. Chạy queue worker và scheduler riêng.
+5. Lưu backup ở object storage ngoài máy chủ.
+6. Bắt buộc HTTPS, email verification và 2FA admin.
+7. Chạy test, migration và wallet reconciliation trong CI/CD.
 
-Không truy cập `localhost:8000` trên Windows. Mở **PORTS → 8000 → Open in Browser**. Laravel đã được cấu hình tin cậy proxy của Codespaces và tự đặt `APP_URL` theo tên Codespace.
-
-## Lỗi cổng 8000 đang dùng
-
-```bash
-pkill -f "artisan serve" || true
-bash run-codespaces.sh
-```
-
-## Dừng server
-
-Nhấn `Ctrl+C` trong Terminal đang chạy server.
+Command `arcade:backup` của v0.5 chỉ hỗ trợ SQLite và phù hợp demo/Codespaces.

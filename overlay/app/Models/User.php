@@ -83,6 +83,11 @@ class User extends Authenticatable
         return $this->hasMany(UserAchievement::class);
     }
 
+    public function missions(): HasMany
+    {
+        return $this->hasMany(UserMission::class);
+    }
+
     public function isSelfExcluded(): bool
     {
         return $this->self_excluded_until !== null && $this->self_excluded_until->isFuture();

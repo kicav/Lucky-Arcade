@@ -9,6 +9,7 @@
         <a class="button secondary" href="{{ route('admin.users.index') }}">Users</a>
         <a class="button secondary" href="{{ route('admin.entries.index') }}">Play history</a>
         <a class="button secondary" href="{{ route('admin.audit.index') }}">Audit log</a>
+        <a class="button secondary" href="{{ route('admin.announcements.index') }}">Announcements</a>
     </div>
 </div>
 <div class="grid stats six">
