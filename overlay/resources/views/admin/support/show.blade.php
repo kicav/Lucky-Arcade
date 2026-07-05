@@ -1,0 +1,8 @@
+@extends('layouts.app')
+@section('title', 'Admin ticket #'.$ticket->id)
+@section('content')
+<div class="page-head"><div><span class="eyebrow">ADMIN SUPPORT #{{ $ticket->id }}</span><h1>{{ $ticket->subject }}</h1><p class="hint">{{ $ticket->user->name }} · {{ $ticket->user->email }} · {{ ucfirst($ticket->category) }}</p></div><span class="status-pill status-{{ $ticket->status }}">{{ ucfirst($ticket->status) }}</span></div>
+<section class="ticket-thread">@foreach($ticket->messages as $message)<article class="ticket-message {{ $message->is_admin ? 'from-admin' : 'from-player' }}"><div class="section-head"><strong>{{ $message->is_admin ? ($message->user?->name ?? 'Admin') : ($message->user?->name ?? 'Player') }}</strong><time>{{ $message->created_at->format('Y-m-d H:i') }}</time></div><p>{{ $message->body }}</p></article>@endforeach</section>
+<section class="grid two"><div class="panel"><h2>Reply</h2><form method="post" action="{{ route('admin.support.reply', $ticket) }}" class="stack">@csrf<label>Message<textarea name="message" rows="5" required></textarea></label><button class="button" type="submit">Reply to player</button></form></div><div class="panel"><h2>Ticket status</h2><form method="post" action="{{ route('admin.support.status', $ticket) }}" class="stack">@csrf @method('PUT')<label>Status<select name="status">@foreach(['open','pending','closed'] as $status)<option value="{{ $status }}" @selected($ticket->status===$status)>{{ ucfirst($status) }}</option>@endforeach</select></label><button class="button secondary" type="submit">Update status</button></form></div></section>
+<a class="text-link" href="{{ route('admin.support.index') }}">← Back to queue</a>
+@endsection

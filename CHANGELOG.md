@@ -1,27 +1,18 @@
 # Changelog
 
-## v0.5.0 — Engagement and operations
+## v0.6.0
 
-- Thêm game Lucky Slots provably fair với ba reel, pair payout và triple paytable.
-- Thêm bốn daily mission: play count, total stake, positive win và unique games.
-- Reward mission đi qua immutable ledger, notification và idempotency key.
-- Thêm trang Player Statistics với summary, xu hướng 14 ngày và thống kê từng game.
-- Thêm admin announcements có lịch bắt đầu/kết thúc, trạng thái active và audit log.
-- Thêm command `arcade:backup` để sao lưu SQLite và tự prune bản cũ.
-- Bổ sung unit/feature tests cho Slots, missions, statistics và announcements.
+- Added promo codes and per-player redemption records.
+- Added player and admin support tickets with threaded messages.
+- Added Weekly League standings and previous-week settlement.
+- Added ledger entries, notifications and audit logging for new reward paths.
+- Added tests for promo redemption, support replies and league settlement.
+- Integrated the v0.5.1 mission date/idempotency hotfix.
 
-## v0.4.0 — Growth, progression and analytics
+## v0.5.1
 
-- High Low, referral first-play reward, achievements và admin analytics.
+- Fixed duplicate daily missions on SQLite date-cast comparisons.
 
-## v0.3.0 — Player controls and operations
+## v0.5.0
 
-- Coin Flip, responsible-play controls, notifications và admin player actions.
-
-## v0.2.0
-
-- Daily reward, leaderboard, fairness verifier, CSV export, audit và reconciliation.
-
-## v0.1.0
-
-- Laravel social-gaming MVP với Dice, Roulette, wallet và admin dashboard.
+- Added Lucky Slots, daily missions, player statistics, announcements and SQLite backup command.

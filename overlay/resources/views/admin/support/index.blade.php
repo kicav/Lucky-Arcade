@@ -1,0 +1,7 @@
+@extends('layouts.app')
+@section('title', 'Admin support')
+@section('content')
+<div class="page-head"><div><span class="eyebrow">ADMINISTRATION</span><h1>Support queue</h1></div><a class="button secondary" href="{{ route('admin.dashboard') }}">Back to admin</a></div>
+<section class="panel"><form method="get" class="filter-grid"><label>Status<select name="status"><option value="">All</option>@foreach(['open','pending','closed'] as $status)<option value="{{ $status }}" @selected(request('status')===$status)>{{ ucfirst($status) }}</option>@endforeach</select></label><button class="button secondary" type="submit">Filter</button></form></section>
+<section class="panel"><div class="table-wrap"><table><thead><tr><th>ID</th><th>Player</th><th>Subject</th><th>Priority</th><th>Status</th><th>Messages</th><th>Updated</th></tr></thead><tbody>@forelse($tickets as $ticket)<tr><td>#{{ $ticket->id }}</td><td>{{ $ticket->user->email }}</td><td><a class="text-link" href="{{ route('admin.support.show', $ticket) }}">{{ $ticket->subject }}</a></td><td>{{ ucfirst($ticket->priority) }}</td><td><span class="status-pill status-{{ $ticket->status }}">{{ ucfirst($ticket->status) }}</span></td><td>{{ $ticket->messages_count }}</td><td>{{ $ticket->updated_at->diffForHumans() }}</td></tr>@empty<tr><td colspan="7">No tickets found.</td></tr>@endforelse</tbody></table></div><div class="pagination">{{ $tickets->links() }}</div></section>
+@endsection

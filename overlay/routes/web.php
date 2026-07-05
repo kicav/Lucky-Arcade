@@ -28,6 +28,12 @@ use App\Http\Controllers\SlotsController;
 use App\Http\Controllers\MissionController;
 use App\Http\Controllers\PlayerStatsController;
 use App\Http\Controllers\Admin\AnnouncementController as AdminAnnouncementController;
+use App\Http\Controllers\PromoCodeController;
+use App\Http\Controllers\SupportTicketController;
+use App\Http\Controllers\WeeklyLeagueController;
+use App\Http\Controllers\Admin\PromoCodeController as AdminPromoCodeController;
+use App\Http\Controllers\Admin\SupportTicketController as AdminSupportTicketController;
+use App\Http\Controllers\Admin\WeeklyLeagueController as AdminWeeklyLeagueController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
@@ -41,6 +47,14 @@ Route::middleware('guest')->group(function (): void {
 });
 
 Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
+
+Route::middleware('auth')->group(function (): void {
+    Route::get('/support', [SupportTicketController::class, 'index'])->name('support.index');
+    Route::post('/support', [SupportTicketController::class, 'store'])->middleware('throttle:5,1')->name('support.store');
+    Route::get('/support/{ticket}', [SupportTicketController::class, 'show'])->name('support.show');
+    Route::post('/support/{ticket}/reply', [SupportTicketController::class, 'reply'])->middleware('throttle:10,1')->name('support.reply');
+    Route::post('/support/{ticket}/close', [SupportTicketController::class, 'close'])->name('support.close');
+});
 
 Route::middleware(['auth', 'active'])->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
@@ -57,6 +71,10 @@ Route::middleware(['auth', 'active'])->group(function (): void {
     Route::get('/missions', [MissionController::class, 'index'])->name('missions.index');
     Route::post('/missions/{mission}/claim', [MissionController::class, 'claim'])->middleware('throttle:10,1')->name('missions.claim');
     Route::get('/stats', PlayerStatsController::class)->name('stats.index');
+
+    Route::get('/promos', [PromoCodeController::class, 'index'])->name('promos.index');
+    Route::post('/promos/redeem', [PromoCodeController::class, 'redeem'])->middleware('throttle:5,1')->name('promos.redeem');
+    Route::get('/weekly-league', WeeklyLeagueController::class)->name('league.index');
 
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
@@ -90,4 +108,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::post('/announcements', [AdminAnnouncementController::class, 'store'])->name('announcements.store');
     Route::put('/announcements/{announcement}', [AdminAnnouncementController::class, 'update'])->name('announcements.update');
     Route::delete('/announcements/{announcement}', [AdminAnnouncementController::class, 'destroy'])->name('announcements.destroy');
+
+    Route::get('/promo-codes', [AdminPromoCodeController::class, 'index'])->name('promos.index');
+    Route::post('/promo-codes', [AdminPromoCodeController::class, 'store'])->name('promos.store');
+    Route::put('/promo-codes/{promo}', [AdminPromoCodeController::class, 'update'])->name('promos.update');
+    Route::post('/promo-codes/{promo}/toggle', [AdminPromoCodeController::class, 'toggle'])->name('promos.toggle');
+    Route::get('/support', [AdminSupportTicketController::class, 'index'])->name('support.index');
+    Route::get('/support/{ticket}', [AdminSupportTicketController::class, 'show'])->name('support.show');
+    Route::post('/support/{ticket}/reply', [AdminSupportTicketController::class, 'reply'])->name('support.reply');
+    Route::put('/support/{ticket}/status', [AdminSupportTicketController::class, 'status'])->name('support.status');
+    Route::get('/weekly-league', [AdminWeeklyLeagueController::class, 'index'])->name('league.index');
+    Route::post('/weekly-league/settle', [AdminWeeklyLeagueController::class, 'settle'])->middleware('throttle:2,1')->name('league.settle');
 });

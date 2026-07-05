@@ -88,6 +88,21 @@ class User extends Authenticatable
         return $this->hasMany(UserMission::class);
     }
 
+    public function promoRedemptions(): HasMany
+    {
+        return $this->hasMany(PromoCodeRedemption::class);
+    }
+
+    public function supportTickets(): HasMany
+    {
+        return $this->hasMany(SupportTicket::class);
+    }
+
+    public function weeklyLeagueRewards(): HasMany
+    {
+        return $this->hasMany(WeeklyLeagueReward::class);
+    }
+
     public function isSelfExcluded(): bool
     {
         return $this->self_excluded_until !== null && $this->self_excluded_until->isFuture();
