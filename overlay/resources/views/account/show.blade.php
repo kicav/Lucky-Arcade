@@ -2,7 +2,7 @@
 @section('title', 'Account')
 @section('content')
 <div class="page-head">
-    <div><span class="eyebrow">ACCOUNT & PLAY CONTROLS</span><h1>Your account</h1></div>
+    <div><span class="eyebrow">ACCOUNT & PLAY CONTROLS</span><h1>Your account</h1><a class="text-link" href="{{ route('security.show') }}">Open security center →</a></div>
     <div class="balance"><span>Today&apos;s stake</span><strong>{{ number_format($todayStake) }}</strong><small>virtual credits</small></div>
 </div>
 

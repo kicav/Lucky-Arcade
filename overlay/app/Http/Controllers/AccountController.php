@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AuditLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Services\SecurityEventService;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
@@ -35,7 +36,7 @@ class AccountController extends Controller
         return back()->with('success', 'Profile updated.');
     }
 
-    public function updatePassword(Request $request): RedirectResponse
+    public function updatePassword(Request $request, SecurityEventService $events): RedirectResponse
     {
         $data = $request->validate([
             'current_password' => ['required', 'current_password'],
@@ -44,6 +45,7 @@ class AccountController extends Controller
 
         $request->user()->update(['password' => Hash::make($data['password'])]);
         $this->audit($request, 'account.password.updated', null, ['password_changed' => true]);
+        $events->record($request->user(), 'password.changed', $request);
 
         return back()->with('success', 'Password updated.');
     }

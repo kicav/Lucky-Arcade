@@ -1,4 +1,4 @@
-# Chạy Lucky Arcade v0.5 trên cloud
+# Chạy Lucky Arcade v0.7 trên cloud
 
 ## Phát triển
 
@@ -21,4 +21,4 @@ Không dùng Codespaces như production host. Khi triển khai lâu dài:
 6. Bắt buộc HTTPS, email verification và 2FA admin.
 7. Chạy test, migration và wallet reconciliation trong CI/CD.
 
-Command `arcade:backup` của v0.5 chỉ hỗ trợ SQLite và phù hợp demo/Codespaces.
+Command `arcade:backup` của v0.7 chỉ hỗ trợ SQLite và phù hợp demo/Codespaces.

@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\GameController as AdminGameController;
 use App\Http\Controllers\Admin\UserActionController as AdminUserActionController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\TwoFactorChallengeController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\CoinFlipController;
 use App\Http\Controllers\DailyRewardController;
@@ -31,9 +32,13 @@ use App\Http\Controllers\Admin\AnnouncementController as AdminAnnouncementContro
 use App\Http\Controllers\PromoCodeController;
 use App\Http\Controllers\SupportTicketController;
 use App\Http\Controllers\WeeklyLeagueController;
+use App\Http\Controllers\SecurityController;
 use App\Http\Controllers\Admin\PromoCodeController as AdminPromoCodeController;
 use App\Http\Controllers\Admin\SupportTicketController as AdminSupportTicketController;
 use App\Http\Controllers\Admin\WeeklyLeagueController as AdminWeeklyLeagueController;
+use App\Http\Controllers\Admin\AdminAccessController;
+use App\Http\Controllers\Admin\SystemController as AdminSystemController;
+use App\Http\Controllers\Admin\SecurityEventController as AdminSecurityEventController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
@@ -44,6 +49,9 @@ Route::middleware('guest')->group(function (): void {
     Route::post('/register', [RegisterController::class, 'store'])->middleware('throttle:5,1')->name('register.store');
     Route::get('/login', [LoginController::class, 'create'])->name('login');
     Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:8,1')->name('login.store');
+    Route::get('/two-factor-challenge', [TwoFactorChallengeController::class, 'create'])->name('two-factor.challenge');
+    Route::post('/two-factor-challenge', [TwoFactorChallengeController::class, 'store'])->middleware('throttle:8,1')->name('two-factor.challenge.store');
+    Route::post('/two-factor-challenge/cancel', [TwoFactorChallengeController::class, 'cancel'])->name('two-factor.challenge.cancel');
 });
 
 Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
@@ -54,6 +62,12 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/support/{ticket}', [SupportTicketController::class, 'show'])->name('support.show');
     Route::post('/support/{ticket}/reply', [SupportTicketController::class, 'reply'])->middleware('throttle:10,1')->name('support.reply');
     Route::post('/support/{ticket}/close', [SupportTicketController::class, 'close'])->name('support.close');
+
+    Route::get('/security', [SecurityController::class, 'show'])->name('security.show');
+    Route::post('/security/two-factor/begin', [SecurityController::class, 'begin'])->middleware('throttle:5,1')->name('security.two-factor.begin');
+    Route::post('/security/two-factor/confirm', [SecurityController::class, 'confirm'])->middleware('throttle:8,1')->name('security.two-factor.confirm');
+    Route::delete('/security/two-factor', [SecurityController::class, 'disable'])->middleware('throttle:5,1')->name('security.two-factor.disable');
+    Route::post('/security/recovery-codes', [SecurityController::class, 'regenerateRecoveryCodes'])->middleware('throttle:5,1')->name('security.recovery-codes.regenerate');
 });
 
 Route::middleware(['auth', 'active'])->group(function (): void {
@@ -93,30 +107,43 @@ Route::middleware(['auth', 'active'])->group(function (): void {
 });
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function (): void {
-    Route::get('/', AdminDashboardController::class)->name('dashboard');
-    Route::get('/analytics', AdminAnalyticsController::class)->name('analytics');
-    Route::get('/games', [AdminGameController::class, 'index'])->name('games.index');
-    Route::put('/games/{game}', [AdminGameController::class, 'update'])->name('games.update');
-    Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
-    Route::get('/users/{user}', [AdminUserActionController::class, 'show'])->name('users.show');
-    Route::post('/users/{user}/suspend', [AdminUserActionController::class, 'suspend'])->name('users.suspend');
-    Route::post('/users/{user}/unsuspend', [AdminUserActionController::class, 'unsuspend'])->name('users.unsuspend');
-    Route::post('/users/{user}/grant', [AdminUserActionController::class, 'grant'])->middleware('throttle:10,1')->name('users.grant');
-    Route::get('/entries', [AdminEntryController::class, 'index'])->name('entries.index');
-    Route::get('/audit-logs', [AdminAuditLogController::class, 'index'])->name('audit.index');
-    Route::get('/announcements', [AdminAnnouncementController::class, 'index'])->name('announcements.index');
-    Route::post('/announcements', [AdminAnnouncementController::class, 'store'])->name('announcements.store');
-    Route::put('/announcements/{announcement}', [AdminAnnouncementController::class, 'update'])->name('announcements.update');
-    Route::delete('/announcements/{announcement}', [AdminAnnouncementController::class, 'destroy'])->name('announcements.destroy');
+    Route::get('/', AdminDashboardController::class)->middleware('admin.area:dashboard')->name('dashboard');
+    Route::get('/analytics', AdminAnalyticsController::class)->middleware('admin.area:analytics')->name('analytics');
 
-    Route::get('/promo-codes', [AdminPromoCodeController::class, 'index'])->name('promos.index');
-    Route::post('/promo-codes', [AdminPromoCodeController::class, 'store'])->name('promos.store');
-    Route::put('/promo-codes/{promo}', [AdminPromoCodeController::class, 'update'])->name('promos.update');
-    Route::post('/promo-codes/{promo}/toggle', [AdminPromoCodeController::class, 'toggle'])->name('promos.toggle');
-    Route::get('/support', [AdminSupportTicketController::class, 'index'])->name('support.index');
-    Route::get('/support/{ticket}', [AdminSupportTicketController::class, 'show'])->name('support.show');
-    Route::post('/support/{ticket}/reply', [AdminSupportTicketController::class, 'reply'])->name('support.reply');
-    Route::put('/support/{ticket}/status', [AdminSupportTicketController::class, 'status'])->name('support.status');
-    Route::get('/weekly-league', [AdminWeeklyLeagueController::class, 'index'])->name('league.index');
-    Route::post('/weekly-league/settle', [AdminWeeklyLeagueController::class, 'settle'])->middleware('throttle:2,1')->name('league.settle');
+    Route::get('/games', [AdminGameController::class, 'index'])->middleware('admin.area:games')->name('games.index');
+    Route::put('/games/{game}', [AdminGameController::class, 'update'])->middleware('admin.area:games')->name('games.update');
+
+    Route::get('/users', [AdminUserController::class, 'index'])->middleware('admin.area:users')->name('users.index');
+    Route::get('/users/{user}', [AdminUserActionController::class, 'show'])->middleware('admin.area:users')->name('users.show');
+    Route::post('/users/{user}/suspend', [AdminUserActionController::class, 'suspend'])->middleware('admin.area:user_actions')->name('users.suspend');
+    Route::post('/users/{user}/unsuspend', [AdminUserActionController::class, 'unsuspend'])->middleware('admin.area:user_actions')->name('users.unsuspend');
+    Route::post('/users/{user}/grant', [AdminUserActionController::class, 'grant'])->middleware(['admin.area:user_actions', 'throttle:10,1'])->name('users.grant');
+
+    Route::get('/entries', [AdminEntryController::class, 'index'])->middleware('admin.area:entries')->name('entries.index');
+    Route::get('/audit-logs', [AdminAuditLogController::class, 'index'])->middleware('admin.area:audit')->name('audit.index');
+    Route::get('/security-events', [AdminSecurityEventController::class, 'index'])->middleware('admin.area:audit')->name('security-events.index');
+
+    Route::get('/announcements', [AdminAnnouncementController::class, 'index'])->middleware('admin.area:announcements')->name('announcements.index');
+    Route::post('/announcements', [AdminAnnouncementController::class, 'store'])->middleware('admin.area:announcements')->name('announcements.store');
+    Route::put('/announcements/{announcement}', [AdminAnnouncementController::class, 'update'])->middleware('admin.area:announcements')->name('announcements.update');
+    Route::delete('/announcements/{announcement}', [AdminAnnouncementController::class, 'destroy'])->middleware('admin.area:announcements')->name('announcements.destroy');
+
+    Route::get('/promo-codes', [AdminPromoCodeController::class, 'index'])->middleware('admin.area:promos')->name('promos.index');
+    Route::post('/promo-codes', [AdminPromoCodeController::class, 'store'])->middleware('admin.area:promos')->name('promos.store');
+    Route::put('/promo-codes/{promo}', [AdminPromoCodeController::class, 'update'])->middleware('admin.area:promos')->name('promos.update');
+    Route::post('/promo-codes/{promo}/toggle', [AdminPromoCodeController::class, 'toggle'])->middleware('admin.area:promos')->name('promos.toggle');
+
+    Route::get('/support', [AdminSupportTicketController::class, 'index'])->middleware('admin.area:support')->name('support.index');
+    Route::get('/support/{ticket}', [AdminSupportTicketController::class, 'show'])->middleware('admin.area:support')->name('support.show');
+    Route::post('/support/{ticket}/reply', [AdminSupportTicketController::class, 'reply'])->middleware('admin.area:support')->name('support.reply');
+    Route::put('/support/{ticket}/status', [AdminSupportTicketController::class, 'status'])->middleware('admin.area:support')->name('support.status');
+
+    Route::get('/weekly-league', [AdminWeeklyLeagueController::class, 'index'])->middleware('admin.area:league')->name('league.index');
+    Route::post('/weekly-league/settle', [AdminWeeklyLeagueController::class, 'settle'])->middleware(['admin.area:league', 'throttle:2,1'])->name('league.settle');
+
+    Route::get('/access', [AdminAccessController::class, 'index'])->middleware('admin.area:access')->name('access.index');
+    Route::put('/access/{user}', [AdminAccessController::class, 'update'])->middleware('admin.area:access')->name('access.update');
+
+    Route::get('/system', [AdminSystemController::class, 'index'])->middleware('admin.area:system')->name('system.index');
+    Route::post('/system/backup', [AdminSystemController::class, 'backup'])->middleware(['admin.area:system', 'throttle:2,1'])->name('system.backup');
 });

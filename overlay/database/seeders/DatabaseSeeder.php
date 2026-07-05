@@ -90,8 +90,13 @@ class DatabaseSeeder extends Seeder
                 'name' => $name,
                 'password' => Hash::make($password),
                 'is_admin' => $isAdmin,
+                'admin_role' => $isAdmin ? 'super_admin' : null,
             ],
         );
+
+        if ($isAdmin && ! $user->admin_role) {
+            $user->forceFill(['is_admin' => true, 'admin_role' => 'super_admin'])->save();
+        }
 
         $user->wallet()->firstOrCreate([], ['balance' => $balance]);
         app(ReferralCodeService::class)->ensure($user);

@@ -26,7 +26,7 @@ fi
 
 if [ -e "$TARGET" ]; then
     echo "$TARGET đã tồn tại và có vẻ đã cài đặt."
-    echo "Để cập nhật v0.6, chạy: bash upgrade-v0.6.sh"
+    echo "Để cập nhật v0.7, chạy: bash upgrade-v0.7.sh"
     exit 0
 fi
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.7.0
+
+- Added optional TOTP two-factor authentication and single-use recovery codes.
+- Added a Security Center and persistent authentication event history.
+- Added Super Admin, Operations, Support and Analyst roles.
+- Added server-side per-area administrator authorization.
+- Added administrator role assignment and System Health dashboards.
+- Added secure response headers and new authentication/security tests.
+
 ## v0.6.0
 
 - Added promo codes and per-player redemption records.

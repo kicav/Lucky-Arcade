@@ -28,6 +28,7 @@ class RegisterController extends Controller
         FairnessSeedService $seeds,
         ReferralCodeService $referralCodes,
     ): RedirectResponse {
+        $request->merge(['email' => mb_strtolower(trim((string) $request->input('email', '')))]);
         $referralCode = strtoupper(trim((string) $request->input('referral_code', '')));
         $request->merge([
             'referral_code' => $referralCode !== '' ? $referralCode : null,

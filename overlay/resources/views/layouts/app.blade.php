@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Lucky Arcade')</title>
-    <link rel="stylesheet" href="/css/app.css?v=7">
-    <script src="/js/app.js?v=7" defer></script>
+    <link rel="stylesheet" href="/css/app.css?v=8">
+    <script src="/js/app.js?v=8" defer></script>
 </head>
 <body>
 <header class="topbar">
@@ -26,6 +26,7 @@
             <a href="{{ route('notifications.index') }}">Notifications @php($unread = auth()->user()->userNotifications()->whereNull('read_at')->count()) @if($unread)<span class="nav-badge">{{ $unread }}</span>@endif</a>
             <a href="{{ route('support.index') }}">Support</a>
             <a href="{{ route('account.show') }}">Account</a>
+            <a href="{{ route('security.show') }}">Security @if(auth()->user()->hasTwoFactorEnabled())<span class="nav-badge secure">2FA</span>@endif</a>
             @if(auth()->user()->is_admin)
                 <a href="{{ route('admin.dashboard') }}">Admin</a>
             @endif
