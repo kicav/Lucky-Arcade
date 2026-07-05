@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Dashboard')
 @section('content')
-<div class="page-head"><div><span class="eyebrow">PLAYER DASHBOARD</span><h1>Hello, {{ auth()->user()->name }}</h1></div><div class="balance"><span>Balance</span><strong>{{ number_format($wallet->balance) }}</strong><small>virtual credits</small></div></div>
+<div class="page-head"><div><span class="eyebrow">PLAYER DASHBOARD</span><h1>Hello, {{ auth()->user()->name }}</h1></div><div class="balance"><span>Balance</span><strong data-live-balance>{{ number_format($wallet->balance) }}</strong><small>virtual credits</small></div></div>
 
 @if(auth()->user()->isSelfExcluded())<div class="alert error">Self-exclusion is active until {{ auth()->user()->self_excluded_until->format('Y-m-d H:i') }}. Game play is temporarily blocked.</div>@endif
 

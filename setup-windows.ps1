@@ -29,7 +29,11 @@ if (-not (Test-Path "database\database.sqlite")) {
 
 php artisan key:generate
 php artisan migrate --seed
+php artisan arcade:metrics --days=14
 php artisan test
+php artisan wallets:reconcile
+php artisan arcade:backup --keep=10
+php artisan arcade:doctor
 
 Write-Host ""
 Write-Host "Cai dat thanh cong." -ForegroundColor Green

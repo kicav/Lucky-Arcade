@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Promo codes')
 @section('content')
-<div class="page-head"><div><span class="eyebrow">BONUS CENTER</span><h1>Redeem a promo code</h1><p class="hint">Promo codes grant virtual credits only and have no cash value.</p></div><div class="balance"><span>Balance</span><strong>{{ number_format(auth()->user()->wallet->balance) }}</strong></div></div>
+<div class="page-head"><div><span class="eyebrow">BONUS CENTER</span><h1>Redeem a promo code</h1><p class="hint">Promo codes grant virtual credits only and have no cash value.</p></div><div class="balance"><span>Balance</span><strong data-live-balance>{{ number_format(auth()->user()->wallet->balance) }}</strong></div></div>
 <section class="panel promo-redeem">
 <form method="post" action="{{ route('promos.redeem') }}" class="promo-form">@csrf
 <label>Promo code<input name="code" value="{{ old('code') }}" maxlength="40" placeholder="WELCOME500" required></label>

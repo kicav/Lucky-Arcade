@@ -1,31 +1,102 @@
-name: Lucky Arcade tests
+name: Lucky Arcade CI
 
 on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
-  phpunit:
+  test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [sqlite, pgsql]
+        php: ['8.3', '8.4']
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: lucky_arcade_test
+          POSTGRES_USER: lucky_arcade
+          POSTGRES_PASSWORD: lucky_arcade_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U lucky_arcade -d lucky_arcade_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
-          extensions: pdo_sqlite, sqlite3
+          php-version: ${{ matrix.php }}
+          extensions: pdo_sqlite, sqlite3, pdo_pgsql
           coverage: none
+
+      - name: Validate repository scripts
+        run: |
+          bash -n setup-linux.sh run-codespaces.sh run-worker.sh run-scheduler.sh upgrade-v0.8.sh enable-horizon.sh
+          find overlay -name '*.php' -print0 | xargs -0 -n1 php -l >/dev/null
+
       - name: Create Laravel test application
         run: composer create-project --no-interaction --prefer-dist laravel/laravel:^13.0 lucky-arcade-ci
+
       - name: Apply Lucky Arcade overlay
         run: cp -R overlay/. lucky-arcade-ci/
-      - name: Configure SQLite
+
+      - name: Configure test environment
         working-directory: lucky-arcade-ci
         run: |
           cp .env.example .env
-          touch database/database.sqlite
           php artisan key:generate
-      - name: Migrate and test
+          sed -i 's/^APP_ENV=.*/APP_ENV=testing/' .env
+          sed -i 's/^APP_DEBUG=.*/APP_DEBUG=false/' .env
+          sed -i 's/^CACHE_STORE=.*/CACHE_STORE=array/' .env
+          sed -i 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' .env
+          sed -i 's/^SESSION_DRIVER=.*/SESSION_DRIVER=array/' .env
+          if [ "${{ matrix.database }}" = "sqlite" ]; then
+            touch database/database.sqlite
+            sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=sqlite/' .env
+            echo 'DB_DATABASE='"$(pwd)"'/database/database.sqlite' >> .env
+          else
+            sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=pgsql/' .env
+            {
+              echo 'DB_HOST=127.0.0.1'
+              echo 'DB_PORT=5432'
+              echo 'DB_DATABASE=lucky_arcade_test'
+              echo 'DB_USERNAME=lucky_arcade'
+              echo 'DB_PASSWORD=lucky_arcade_test'
+            } >> .env
+          fi
+
+      - name: Migrate, seed and test
         working-directory: lucky-arcade-ci
         run: |
           php artisan migrate --seed --force
+          php artisan arcade:metrics --days=14
           php artisan test
+          php artisan wallets:reconcile
+          php artisan arcade:doctor
+
+      - name: Audit Composer dependencies
+        working-directory: lucky-arcade-ci
+        run: composer audit --locked
+
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create deployable Laravel application
+        run: |
+          docker run --rm -v "$PWD:/workspace" -w /workspace composer:2 \
+            create-project --no-interaction --prefer-dist laravel/laravel:^13.0 lucky-arcade-ci
+          cp -R overlay/. lucky-arcade-ci/
+      - name: Build production image
+        run: docker build -f lucky-arcade-ci/docker/Dockerfile lucky-arcade-ci

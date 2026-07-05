@@ -13,6 +13,7 @@
         @if(auth()->user()->canAccessAdminArea('announcements'))<a class="button secondary" href="{{ route('admin.announcements.index') }}">Announcements</a>@endif
         @if(auth()->user()->canAccessAdminArea('promos'))<a class="button secondary" href="{{ route('admin.promos.index') }}">Promo codes</a>@endif
         @if(auth()->user()->canAccessAdminArea('support'))<a class="button secondary" href="{{ route('admin.support.index') }}">Support</a>@endif
+        @if(auth()->user()->canAccessAdminArea('live'))<a class="button secondary" href="{{ route('admin.live.index') }}">Live operations</a>@endif
         @if(auth()->user()->canAccessAdminArea('league'))<a class="button secondary" href="{{ route('admin.league.index') }}">Weekly League</a>@endif
         @if(auth()->user()->canAccessAdminArea('system'))<a class="button secondary" href="{{ route('admin.system.index') }}">System health</a>@endif
         @if(auth()->user()->canAccessAdminArea('access'))<a class="button secondary" href="{{ route('admin.access.index') }}">Admin access</a>@endif

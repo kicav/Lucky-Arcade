@@ -20,6 +20,7 @@ use App\Http\Controllers\GameController;
 use App\Http\Controllers\HighLowController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LeaderboardController;
+use App\Http\Controllers\LiveFeedController;
 use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\LedgerExportController;
 use App\Http\Controllers\NotificationController;
@@ -39,6 +40,7 @@ use App\Http\Controllers\Admin\WeeklyLeagueController as AdminWeeklyLeagueContro
 use App\Http\Controllers\Admin\AdminAccessController;
 use App\Http\Controllers\Admin\SystemController as AdminSystemController;
 use App\Http\Controllers\Admin\SecurityEventController as AdminSecurityEventController;
+use App\Http\Controllers\Admin\LiveOperationsController as AdminLiveOperationsController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
@@ -56,10 +58,11 @@ Route::middleware('guest')->group(function (): void {
 
 Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
 
-Route::middleware('auth')->group(function (): void {
+Route::middleware(['auth', 'presence'])->group(function (): void {
     Route::get('/support', [SupportTicketController::class, 'index'])->name('support.index');
     Route::post('/support', [SupportTicketController::class, 'store'])->middleware('throttle:5,1')->name('support.store');
     Route::get('/support/{ticket}', [SupportTicketController::class, 'show'])->name('support.show');
+    Route::get('/support/{ticket}/messages', [SupportTicketController::class, 'messages'])->name('support.messages');
     Route::post('/support/{ticket}/reply', [SupportTicketController::class, 'reply'])->middleware('throttle:10,1')->name('support.reply');
     Route::post('/support/{ticket}/close', [SupportTicketController::class, 'close'])->name('support.close');
 
@@ -70,7 +73,7 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/security/recovery-codes', [SecurityController::class, 'regenerateRecoveryCodes'])->middleware('throttle:5,1')->name('security.recovery-codes.regenerate');
 });
 
-Route::middleware(['auth', 'active'])->group(function (): void {
+Route::middleware(['auth', 'active', 'presence'])->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/ledger/export', LedgerExportController::class)->middleware('throttle:10,1')->name('ledger.export');
     Route::post('/daily-reward', [DailyRewardController::class, 'store'])->middleware('throttle:3,1')->name('daily-reward.store');
@@ -92,6 +95,8 @@ Route::middleware(['auth', 'active'])->group(function (): void {
 
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+    Route::get('/live/feed', LiveFeedController::class)->middleware('throttle:120,1')->name('live.feed');
+    Route::get('/weekly-league/data', [WeeklyLeagueController::class, 'data'])->middleware('throttle:60,1')->name('league.data');
 
     Route::get('/games', [GameController::class, 'index'])->name('games.index');
     Route::get('/games/{game}', [GameController::class, 'show'])->name('games.show');
@@ -106,8 +111,10 @@ Route::middleware(['auth', 'active'])->group(function (): void {
     Route::post('/fairness/verify', [FairnessController::class, 'verify'])->middleware('throttle:20,1')->name('fairness.verify');
 });
 
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function (): void {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'presence'])->group(function (): void {
     Route::get('/', AdminDashboardController::class)->middleware('admin.area:dashboard')->name('dashboard');
+    Route::get('/live', [AdminLiveOperationsController::class, 'index'])->middleware('admin.area:live')->name('live.index');
+    Route::get('/live/data', [AdminLiveOperationsController::class, 'data'])->middleware(['admin.area:live', 'throttle:120,1'])->name('live.data');
     Route::get('/analytics', AdminAnalyticsController::class)->middleware('admin.area:analytics')->name('analytics');
 
     Route::get('/games', [AdminGameController::class, 'index'])->middleware('admin.area:games')->name('games.index');
@@ -135,6 +142,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 
     Route::get('/support', [AdminSupportTicketController::class, 'index'])->middleware('admin.area:support')->name('support.index');
     Route::get('/support/{ticket}', [AdminSupportTicketController::class, 'show'])->middleware('admin.area:support')->name('support.show');
+    Route::get('/support/{ticket}/messages', [AdminSupportTicketController::class, 'messages'])->middleware('admin.area:support')->name('support.messages');
     Route::post('/support/{ticket}/reply', [AdminSupportTicketController::class, 'reply'])->middleware('admin.area:support')->name('support.reply');
     Route::put('/support/{ticket}/status', [AdminSupportTicketController::class, 'status'])->middleware('admin.area:support')->name('support.status');
 
@@ -146,4 +154,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 
     Route::get('/system', [AdminSystemController::class, 'index'])->middleware('admin.area:system')->name('system.index');
     Route::post('/system/backup', [AdminSystemController::class, 'backup'])->middleware(['admin.area:system', 'throttle:2,1'])->name('system.backup');
+    Route::post('/system/reconcile', [AdminSystemController::class, 'reconcile'])->middleware(['admin.area:system', 'throttle:2,1'])->name('system.reconcile');
+    Route::post('/system/metrics', [AdminSystemController::class, 'metrics'])->middleware(['admin.area:system', 'throttle:2,1'])->name('system.metrics');
+    Route::post('/system/prune', [AdminSystemController::class, 'prune'])->middleware(['admin.area:system', 'throttle:2,1'])->name('system.prune');
 });

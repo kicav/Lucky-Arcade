@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\DailyGameMetric;
 use App\Models\Game;
 use App\Models\GameEntry;
 use App\Models\ReferralReward;
@@ -15,21 +16,21 @@ class AnalyticsController extends Controller
     public function __invoke(): View
     {
         $start = CarbonImmutable::today()->subDays(13);
-        $entries = GameEntry::query()
-            ->with('game:id,code,name')
-            ->where('created_at', '>=', $start)
-            ->get();
+        $metrics = DailyGameMetric::query()
+            ->where('metric_date', '>=', $start->toDateString())
+            ->get()
+            ->groupBy(fn (DailyGameMetric $metric): string => $metric->metric_date->toDateString());
 
-        $daily = collect(range(0, 13))->map(function (int $offset) use ($start, $entries): array {
+        $daily = collect(range(0, 13))->map(function (int $offset) use ($start, $metrics): array {
             $date = $start->addDays($offset);
-            $rows = $entries->filter(fn (GameEntry $entry) => $entry->created_at->toDateString() === $date->toDateString());
+            $rows = $metrics->get($date->toDateString(), collect());
 
             return [
                 'date' => $date,
-                'plays' => $rows->count(),
-                'stake' => (int) $rows->sum('stake'),
-                'payout' => (int) $rows->sum('payout'),
-                'net' => (int) $rows->sum('stake') - (int) $rows->sum('payout'),
+                'plays' => (int) $rows->sum('plays'),
+                'stake' => (int) $rows->sum('total_stake'),
+                'payout' => (int) $rows->sum('total_payout'),
+                'net' => (int) $rows->sum('system_net'),
             ];
         });
 
@@ -49,6 +50,11 @@ class AnalyticsController extends Controller
             ];
         });
 
+        $latestEntryAt = GameEntry::query()->max('created_at');
+        $latestMetricAt = DailyGameMetric::query()->max('updated_at');
+        $metricsLagging = $latestEntryAt !== null
+            && ($latestMetricAt === null || strtotime((string) $latestMetricAt) < strtotime((string) $latestEntryAt));
+
         return view('admin.analytics', [
             'daily' => $daily,
             'gameRows' => $gameRows,
@@ -56,6 +62,8 @@ class AnalyticsController extends Controller
             'referralRewards' => ReferralReward::query()->count(),
             'achievementUnlocks' => UserAchievement::query()->count(),
             'activePlayers14d' => GameEntry::query()->where('created_at', '>=', $start)->distinct()->count('user_id'),
+            'metricsLagging' => $metricsLagging,
+            'latestMetricAt' => $latestMetricAt,
         ]);
     }
 }

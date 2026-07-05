@@ -26,7 +26,7 @@ fi
 
 if [ -e "$TARGET" ]; then
     echo "$TARGET đã tồn tại và có vẻ đã cài đặt."
-    echo "Để cập nhật v0.7, chạy: bash upgrade-v0.7.sh"
+    echo "Để cập nhật v0.9, chạy: bash upgrade-v0.9.sh"
     exit 0
 fi
 
@@ -65,6 +65,10 @@ touch database/database.sqlite
 XDEBUG_MODE=off php artisan key:generate --force
 XDEBUG_MODE=off php artisan optimize:clear
 XDEBUG_MODE=off php artisan migrate --seed --force
+XDEBUG_MODE=off php artisan arcade:metrics --days=14
 XDEBUG_MODE=off php artisan test
+XDEBUG_MODE=off php artisan wallets:reconcile
+XDEBUG_MODE=off php artisan arcade:backup --keep=10
+XDEBUG_MODE=off php artisan arcade:doctor
 
 printf '\nCài đặt hoàn tất.\nChạy ứng dụng bằng:\n  bash run-codespaces.sh\n\n'

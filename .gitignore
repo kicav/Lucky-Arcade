@@ -5,3 +5,6 @@ lucky-arcade-app/
 vendor/
 node_modules/
 .DS_Store
+.env.production
+*.dump
+storage/app/backups/

@@ -4,7 +4,7 @@
 @php($gameResult = session('game_result'))
 <div class="page-head">
     <div><span class="eyebrow">SINGLE ZERO</span><h1>European Roulette</h1></div>
-    <div class="balance"><span>Balance</span><strong>{{ number_format($wallet->balance) }}</strong></div>
+    <div class="balance"><span>Balance</span><strong data-live-balance>{{ number_format($wallet->balance) }}</strong></div>
 </div>
 <div class="game-layout">
 <section class="game-stage roulette-stage {{ $gameResult ? (($gameResult['won'] ?? false) ? 'stage-win' : 'stage-loss') : '' }}">

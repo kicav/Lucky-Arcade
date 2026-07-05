@@ -1,5 +1,27 @@
 # Changelog
 
+## v0.9.0
+
+- Added a database-backed live event stream with user, public and administrator audiences.
+- Added adaptive browser polling, live notification counts and toast messages.
+- Added live support message polling and AJAX replies for players and administrators.
+- Added live Weekly League refresh after game settlement.
+- Added online-presence tracking with throttled database writes.
+- Added an Admin Live Operations dashboard.
+- Added event and presence pruning with a scheduled command.
+- Added feature tests for feed privacy, live support, presence and administrator live operations.
+
+## v0.8.0
+
+- Added PostgreSQL and Redis production configuration with Docker Compose.
+- Added queued, after-commit daily game metrics and an analytics aggregate table.
+- Added production doctor, operational pruning and metrics rebuild commands.
+- Added queue and scheduler processes to the Codespaces runner.
+- Added queue, backup, readiness and operation-run information to System Operations.
+- Added consistent PostgreSQL backups through `pg_dump`.
+- Added a PHP/database CI matrix, Composer audit and Dependabot configuration.
+- Added scheduled reconciliation, backups, metrics, pruning and failed-job cleanup.
+
 ## v0.7.0
 
 - Added optional TOTP two-factor authentication and single-use recovery codes.

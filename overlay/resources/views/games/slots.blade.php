@@ -6,7 +6,7 @@
 @php($symbolIcons = ['cherry' => '🍒', 'lemon' => '🍋', 'bell' => '🔔', 'star' => '⭐', 'seven' => '7'])
 <div class="page-head">
     <div><span class="eyebrow">PROVABLY FAIR</span><h1>Lucky Slots</h1></div>
-    <div class="balance"><span>Balance</span><strong>{{ number_format($wallet->balance) }}</strong></div>
+    <div class="balance"><span>Balance</span><strong data-live-balance>{{ number_format($wallet->balance) }}</strong></div>
 </div>
 <div class="game-layout">
 <section class="game-stage slot-stage {{ $gameResult ? (($gameResult['won'] ?? false) ? 'stage-win' : 'stage-loss') : '' }}">

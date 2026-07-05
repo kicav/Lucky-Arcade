@@ -3,7 +3,7 @@
 @section('content')
 <div class="page-head">
     <div><span class="eyebrow">DAILY MISSIONS</span><h1>Fresh goals every day</h1><p class="hint">Progress resets at midnight in the application timezone.</p></div>
-    <div class="balance"><span>Balance</span><strong>{{ number_format($wallet->balance) }}</strong></div>
+    <div class="balance"><span>Balance</span><strong data-live-balance>{{ number_format($wallet->balance) }}</strong></div>
 </div>
 <div class="mission-grid">
 @foreach($missions as $mission)

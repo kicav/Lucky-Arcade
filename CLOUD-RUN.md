@@ -1,24 +1,20 @@
-# Chạy Lucky Arcade v0.7 trên cloud
+# Chạy Lucky Arcade v0.9 trên cloud
 
-## Phát triển
-
-Dùng GitHub Codespaces và SQLite:
+## Codespaces
 
 ```bash
 bash setup-linux.sh
 bash run-codespaces.sh
 ```
 
-## Hosting liên tục
+Runner khởi động web server, queue worker và scheduler. Live Experience sử dụng HTTPS polling nên không cần mở thêm cổng WebSocket.
 
-Không dùng Codespaces như production host. Khi triển khai lâu dài:
+## Production Docker
 
-1. Chuyển database sang PostgreSQL.
-2. Đặt `APP_ENV=production`, `APP_DEBUG=false`.
-3. Dùng Redis cho cache, queue và distributed lock.
-4. Chạy queue worker và scheduler riêng.
-5. Lưu backup ở object storage ngoài máy chủ.
-6. Bắt buộc HTTPS, email verification và 2FA admin.
-7. Chạy test, migration và wallet reconciliation trong CI/CD.
+```bash
+cp .env.production.example .env.production
+docker compose --env-file .env.production -f docker-compose.production.yml up -d --build
+docker compose --env-file .env.production -f docker-compose.production.yml exec app php artisan arcade:doctor --strict
+```
 
-Command `arcade:backup` của v0.7 chỉ hỗ trợ SQLite và phù hợp demo/Codespaces.
+Production uses PostgreSQL and Redis. Set unique secrets, HTTPS domain, administrator 2FA and external encrypted backup storage before public access.

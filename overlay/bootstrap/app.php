@@ -4,6 +4,7 @@ use App\Http\Middleware\EnsureAccountActive;
 use App\Http\Middleware\EnsureAdmin;
 use App\Http\Middleware\EnsureAdminArea;
 use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\TouchPresence;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -22,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => EnsureAdmin::class,
             'admin.area' => EnsureAdminArea::class,
             'active' => EnsureAccountActive::class,
+            'presence' => TouchPresence::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -7,6 +7,7 @@ use App\Models\AuditLog;
 use App\Models\SupportMessage;
 use App\Models\SupportTicket;
 use App\Models\UserNotification;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -28,10 +29,22 @@ class SupportTicketController extends Controller
         return view('admin.support.show', ['ticket' => $ticket->load(['user', 'messages.user'])]);
     }
 
-    public function reply(Request $request, SupportTicket $ticket): RedirectResponse
+    public function messages(Request $request, SupportTicket $ticket): JsonResponse
+    {
+        $after = max(0, (int) $request->integer('after', 0));
+        $messages = $ticket->messages()->with('user')->where('id', '>', $after)->limit(100)->get();
+
+        return response()->json([
+            'messages' => $messages->map(fn (SupportMessage $message): array => $this->messagePayload($message))->values(),
+            'ticket_status' => $ticket->fresh()->status,
+            'next_after' => (int) ($messages->last()?->id ?? $after),
+        ]);
+    }
+
+    public function reply(Request $request, SupportTicket $ticket): JsonResponse|RedirectResponse
     {
         $data = $request->validate(['message' => ['required', 'string', 'min:2', 'max:4000']]);
-        SupportMessage::query()->create([
+        $message = SupportMessage::query()->create([
             'support_ticket_id' => $ticket->id,
             'user_id' => $request->user()->id,
             'is_admin' => true,
@@ -47,6 +60,13 @@ class SupportTicketController extends Controller
             'data' => ['ticket_id' => $ticket->id],
         ]);
         $this->audit($request, $ticket, 'support_ticket.replied');
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => $this->messagePayload($message->load('user')),
+                'ticket_status' => 'pending',
+            ], 201);
+        }
 
         return back()->with('success', 'Reply sent to player.');
     }
@@ -69,6 +89,19 @@ class SupportTicketController extends Controller
         $this->audit($request, $ticket, 'support_ticket.status_updated');
 
         return back()->with('success', 'Ticket status updated.');
+    }
+
+    /** @return array<string, mixed> */
+    private function messagePayload(SupportMessage $message): array
+    {
+        return [
+            'id' => $message->id,
+            'is_admin' => $message->is_admin,
+            'author' => $message->user?->name ?? ($message->is_admin ? 'Admin' : 'Player'),
+            'body' => $message->body,
+            'created_at' => $message->created_at?->toIso8601String(),
+            'created_label' => $message->created_at?->format('Y-m-d H:i'),
+        ];
     }
 
     private function audit(Request $request, SupportTicket $ticket, string $action): void

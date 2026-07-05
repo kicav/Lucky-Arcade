@@ -22,8 +22,8 @@ class User extends Authenticatable
 
     private const ADMIN_AREA_ACCESS = [
         'super_admin' => ['*'],
-        'operations' => ['dashboard', 'analytics', 'games', 'users', 'user_actions', 'entries', 'audit', 'announcements', 'promos', 'support', 'league', 'system'],
-        'support' => ['dashboard', 'users', 'support'],
+        'operations' => ['dashboard', 'analytics', 'games', 'users', 'user_actions', 'entries', 'audit', 'announcements', 'promos', 'support', 'league', 'system', 'live'],
+        'support' => ['dashboard', 'users', 'support', 'live'],
         'analyst' => ['dashboard', 'analytics', 'entries', 'audit'],
     ];
 
@@ -126,6 +126,16 @@ class User extends Authenticatable
     public function securityEvents(): HasMany
     {
         return $this->hasMany(SecurityEvent::class);
+    }
+
+    public function presence(): HasOne
+    {
+        return $this->hasOne(UserPresence::class);
+    }
+
+    public function liveEvents(): HasMany
+    {
+        return $this->hasMany(LiveEvent::class);
     }
 
     public function hasTwoFactorEnabled(): bool

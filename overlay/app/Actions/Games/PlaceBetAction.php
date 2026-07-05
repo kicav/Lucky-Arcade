@@ -3,6 +3,7 @@
 namespace App\Actions\Games;
 
 use App\Enums\LedgerDirection;
+use App\Events\GameSettled;
 use App\Models\FairnessSeed;
 use App\Models\Game;
 use App\Models\GameEntry;
@@ -137,6 +138,10 @@ final class PlaceBetAction
             $this->missions->recordPlay($lockedUser);
 
             $seed->increment('nonce');
+
+            DB::afterCommit(static function () use ($entry): void {
+                GameSettled::dispatch($entry->id);
+            });
 
             return $entry->fresh(['game']);
         }, attempts: 3);

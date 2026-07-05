@@ -1,7 +1,8 @@
 @extends('layouts.app')
 @section('title', 'Admin analytics')
 @section('content')
-<div class="page-head"><div><span class="eyebrow">ADMIN ANALYTICS</span><h1>Platform insights</h1></div><a class="button secondary" href="{{ route('admin.dashboard') }}">Back to overview</a></div>
+<div class="page-head"><div><span class="eyebrow">ADMIN ANALYTICS</span><h1>Platform insights</h1><p>Daily charts are read from queued, idempotent aggregate metrics.</p></div><a class="button secondary" href="{{ route('admin.dashboard') }}">Back to overview</a></div>
+@if($metricsLagging)<div class="alert error">Analytics metrics are behind the latest game entry. Keep the queue worker running or refresh metrics from System operations.</div>@elseif($latestMetricAt)<div class="alert success">Daily metrics updated {{ \Illuminate\Support\Carbon::parse($latestMetricAt)->diffForHumans() }}.</div>@endif
 <div class="grid stats"><div class="stat"><span>Active players · 14d</span><strong>{{ number_format($activePlayers14d) }}</strong></div><div class="stat"><span>Referral rewards</span><strong>{{ number_format($referralRewards) }}</strong></div><div class="stat"><span>Achievements unlocked</span><strong>{{ number_format($achievementUnlocks) }}</strong></div></div>
 <section class="panel"><h2>Daily activity · last 14 days</h2><div class="bar-chart">@foreach($daily as $day)<div class="bar-column" title="{{ $day['date']->format('Y-m-d') }} · {{ number_format($day['stake']) }} stake"><div class="bar-value">{{ $day['stake'] ? number_format($day['stake']) : '' }}</div><div class="bar" style="height: {{ max(4, (int) round(($day['stake'] / $maxDailyStake) * 180)) }}px"></div><small>{{ $day['date']->format('m/d') }}</small></div>@endforeach</div></section>
 <div class="grid two">
