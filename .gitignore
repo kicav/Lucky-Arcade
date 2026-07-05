@@ -1,0 +1,7 @@
+
+lucky-arcade-app/
+.env
+*.sqlite
+vendor/
+node_modules/
+storage/logs/*.log
