@@ -31,6 +31,14 @@ class RouletteController extends Controller
             ? "You won {$entry->payout} credits. Number: {$entry->result['number']} ({$entry->result['color']})"
             : "You lost. Number: {$entry->result['number']} ({$entry->result['color']})";
 
-        return back()->with('result', $message);
+        return back()->with([
+            'result' => $message,
+            'game_result' => [
+                'game' => $game->code,
+                'won' => (bool) ($entry->result['won'] ?? false),
+                'payout' => $entry->payout,
+                'result' => $entry->result,
+            ],
+        ]);
     }
 }

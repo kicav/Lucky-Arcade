@@ -2,8 +2,25 @@
 @section('title', 'Provably fair')
 @section('content')
 <span class="eyebrow">TRANSPARENCY</span><h1>Provably fair seeds</h1>
-<p>The hash is visible before play. Rotate the seed to reveal the old server seed and independently recompute historical results.</p>
+<p>The hash is visible before play. Rotate the seed to reveal the old server seed, then verify historical results independently.</p>
 
+@if(session('verification'))
+    @php($verification = session('verification'))
+    <section class="verification-card {{ $verification['verified'] ? 'verified' : 'failed' }}">
+        <div>
+            <span class="eyebrow">VERIFICATION RESULT</span>
+            <h2>{{ $verification['verified'] ? 'Result verified successfully' : 'Verification failed or seed unavailable' }}</h2>
+            @if(isset($verification['reason']))
+                <p>{{ $verification['reason'] }}</p>
+            @else
+                <p>Hash: {{ $verification['hash_matches'] ? 'match' : 'mismatch' }} · Result: {{ $verification['result_matches'] ? 'match' : 'mismatch' }} · Payout: {{ $verification['payout_matches'] ? 'match' : 'mismatch' }}</p>
+            @endif
+        </div>
+        <span class="status-pill">{{ $verification['verified'] ? 'Verified' : 'Not verified' }}</span>
+    </section>
+@endif
+
+<div class="grid two">
 <section class="panel">
     <h2>Active seed</h2>
     <dl class="details">
@@ -17,6 +34,27 @@
         <button class="button secondary" type="submit">Reveal old seed and rotate</button>
     </form>
 </section>
+
+<section class="panel">
+    <h2>Verify a historical play</h2>
+    <p class="hint">A play becomes verifiable after its server seed has been rotated and revealed.</p>
+    <form method="post" action="{{ route('fairness.verify') }}" class="stack compact">
+        @csrf
+        <label>Historical play
+            <select name="entry_id" required>
+                <option value="">Choose a revealed play</option>
+                @foreach($verifiableEntries as $entry)
+                    <option value="{{ $entry->id }}">#{{ $entry->id }} · {{ $entry->game->name }} · nonce {{ $entry->nonce }} · {{ $entry->created_at->format('Y-m-d H:i') }}</option>
+                @endforeach
+            </select>
+        </label>
+        <button class="button" type="submit">Recompute and verify</button>
+    </form>
+    @if($verifiableEntries->isEmpty())
+        <p class="empty-note">Play at least once, then rotate the seed to unlock verification.</p>
+    @endif
+</section>
+</div>
 
 <section class="panel">
     <h2>Revealed seeds</h2>

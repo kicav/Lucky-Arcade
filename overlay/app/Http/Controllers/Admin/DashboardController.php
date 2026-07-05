@@ -12,12 +12,16 @@ class DashboardController extends Controller
 {
     public function __invoke(): View
     {
+        $totalStake = (int) GameEntry::query()->sum('stake');
+        $totalPayout = (int) GameEntry::query()->sum('payout');
+
         return view('admin.dashboard', [
             'userCount' => User::query()->where('is_admin', false)->count(),
             'gameCount' => Game::query()->count(),
             'entryCount' => GameEntry::query()->count(),
-            'totalStake' => GameEntry::query()->sum('stake'),
-            'totalPayout' => GameEntry::query()->sum('payout'),
+            'totalStake' => $totalStake,
+            'totalPayout' => $totalPayout,
+            'houseNet' => $totalStake - $totalPayout,
             'latestEntries' => GameEntry::query()->with(['user', 'game'])->latest()->limit(12)->get(),
         ]);
     }

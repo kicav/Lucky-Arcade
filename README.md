@@ -1,143 +1,114 @@
-# Lucky Arcade — Social Casino dùng coin ảo
+# Lucky Arcade v0.2
 
-Lucky Arcade là bộ mã nguồn khởi đầu cho một nền tảng trò chơi may rủi **chỉ sử dụng credit ảo, không nạp/rút và không quy đổi thành tiền**. Dự án được thiết kế theo kiến trúc Laravel monolith, có giao diện người chơi, dashboard quản trị, ví credit theo sổ cái và cơ chế kết quả có thể kiểm chứng.
+Lucky Arcade là nền tảng **social gaming chỉ dùng credit ảo**, được xây bằng Laravel 13. Credit không thể nạp, rút hoặc quy đổi thành tiền.
 
-## Phạm vi phiên bản MVP
+## Chức năng hiện có
 
-- Đăng ký, đăng nhập và đăng xuất.
-- Mỗi tài khoản mới nhận 10.000 credit dùng thử.
-- Ví credit có `ledger_entries`; không sửa số dư mà không ghi sổ cái.
-- Dice: chọn `under/over`, ngưỡng 2–98, house edge 1%.
-- European Roulette: straight, red/black, odd/even, low/high và dozen.
-- Provably fair bằng HMAC-SHA256, server-seed hash, client seed và nonce.
-- Trang kiểm tra/đổi seed; seed cũ được công khai sau khi rotate.
-- Dashboard người chơi, lịch sử lượt chơi và lịch sử ví.
-- Dashboard admin chỉ xem thống kê, bật/tắt game và sửa giới hạn cược.
-- Audit log cho thay đổi cấu hình game.
-- Không có payment gateway, withdrawal, sportsbook hoặc chức năng chọn người thắng.
+### Nền tảng v0.1
 
-## Công nghệ
+- Đăng ký, đăng nhập, đăng xuất và session.
+- Ví credit với sổ cái bất biến (`ledger_entries`).
+- Dice và European Roulette.
+- Kết quả HMAC-SHA256 với server seed, client seed và nonce.
+- Dashboard người chơi và quản trị.
+- Bật/tắt game, giới hạn cược và audit log.
 
-- PHP 8.3+
-- Laravel 13
-- MySQL/PostgreSQL/SQLite
-- Blade + CSS thuần, không bắt buộc Node.js
-- PHPUnit
+### Bổ sung trong v0.2
 
-## Cài đặt nhanh trên Windows
+- Daily reward 250 credit, chỉ nhận một lần mỗi ngày.
+- Leaderboard theo số dư và tổng net thắng/thua.
+- Trình xác minh lượt chơi sau khi server seed được công khai.
+- Xuất sổ cái cá nhân thành CSV.
+- Lịch sử lượt chơi cho admin, có bộ lọc.
+- Trang audit log cho admin.
+- Lệnh kiểm tra tính nhất quán ví: `php artisan wallets:reconcile`.
+- Rate limit cho đăng nhập, đăng ký, đặt cược và nhận thưởng.
+- Animation nhẹ cho Dice và Roulette, không cần Node.js.
+- Sửa URL/proxy cho GitHub Codespaces.
+- GitHub Actions kiểm thử overlay tự động.
 
-Yêu cầu: PHP 8.3+, Composer và extension SQLite.
+## Chạy mới trên GitHub Codespaces
 
-Mở PowerShell trong thư mục này:
+1. Đưa toàn bộ nội dung repository lên GitHub, bao gồm `.devcontainer`.
+2. Chọn **Code → Codespaces → Create codespace on main**.
+3. Trong Terminal:
 
-```powershell
-Set-ExecutionPolicy -Scope Process Bypass
-.\setup-windows.ps1
+```bash
+bash setup-linux.sh
+bash run-codespaces.sh
 ```
 
-Script sẽ tạo thư mục `lucky-arcade-app`, cài Laravel 13, chép phần triển khai, tạo SQLite, migrate và seed dữ liệu.
-
-Sau đó:
-
-```powershell
-cd lucky-arcade-app
-php artisan serve
-```
-
-Truy cập `http://127.0.0.1:8000`.
+4. Mở **PORTS → 8000 → Open in Browser**.
 
 Tài khoản mẫu:
 
+- Player: `demo@example.com` / `Demo123!`
 - Admin: `admin@example.com` / `ChangeMe123!`
-- Người chơi: `demo@example.com` / `Demo123!`
 
-**Phải đổi mật khẩu admin trước khi public.**
+Đổi mật khẩu admin trước khi công khai cổng.
 
-## Cài đặt thủ công
+## Nâng cấp từ v0.1 đang chạy
 
-```bash
-composer create-project laravel/laravel:^13.0 lucky-arcade-app
-cp -R overlay/. lucky-arcade-app/
-cd lucky-arcade-app
-cp .env.example .env
-php artisan key:generate
-```
-
-Với SQLite:
+Sao lưu hoặc commit repository trước. Sau khi chép nội dung v0.2 vào repository:
 
 ```bash
-touch database/database.sqlite
+cd /workspaces/Lucky-Arcade
+git pull
+bash upgrade-v0.2.sh
+bash run-codespaces.sh
 ```
 
-Cập nhật `.env`:
+Script nâng cấp sẽ:
 
-```env
-APP_NAME="Lucky Arcade"
-DB_CONNECTION=sqlite
-SESSION_DRIVER=database
-CACHE_STORE=database
-QUEUE_CONNECTION=database
-```
+1. Sao lưu `database/database.sqlite`.
+2. Chép overlay v0.2 vào ứng dụng hiện tại.
+3. Giữ nguyên `.env`, người dùng, ví và lịch sử chơi.
+4. Chạy migration mới.
+5. Xóa cache và chạy test.
 
-Khởi tạo:
+## Kiểm tra sau nâng cấp
 
 ```bash
-php artisan migrate --seed
+cd /workspaces/Lucky-Arcade/lucky-arcade-app
+php artisan route:list
+php artisan wallets:reconcile
 php artisan test
-php artisan serve
 ```
 
-## Luồng một lượt chơi
+Các đường dẫn mới:
 
-1. Backend kiểm tra game, giới hạn cược và request id.
-2. Transaction database được mở.
-3. Wallet và fairness seed bị khóa bằng `lockForUpdate()`.
-4. Engine tạo kết quả từ server seed, client seed và nonce.
-5. Game entry được tạo.
-6. Credit cược bị trừ và ghi ledger.
-7. Nếu thắng, payout được cộng và ghi ledger riêng.
-8. Nonce tăng đúng một đơn vị.
-9. Transaction commit; lỗi ở bất kỳ bước nào sẽ rollback.
+- `/leaderboard`
+- `/ledger/export`
+- `/admin/entries`
+- `/admin/audit-logs`
 
-## Cấu trúc chính
+## Luồng fairness
+
+1. Người chơi thấy hash của server seed trước khi chơi.
+2. Lượt chơi lưu client seed, nonce và hash.
+3. Khi rotate seed, server seed cũ được công khai.
+4. Trang Fairness chạy lại đúng game engine với dữ liệu lịch sử.
+5. Hash, kết quả thắng/thua và payout đều phải khớp.
+
+## Cấu trúc repository
 
 ```text
-app/
-├── Actions/Games/PlaceBetAction.php
-├── Contracts/GameEngine.php
-├── DTO/GameOutcome.php
-├── GameEngines/
-│   ├── DiceEngine.php
-│   └── RouletteEngine.php
-├── Services/
-│   ├── FairnessSeedService.php
-│   ├── GameEngineRegistry.php
-│   └── ProvablyFairService.php
-├── Models/
-└── Http/Controllers/
+.devcontainer/          Môi trường GitHub Codespaces
+overlay/                Mã nguồn chép lên Laravel sạch
+docs/                   Kiến trúc và roadmap
+setup-linux.sh          Cài mới
+upgrade-v0.2.sh         Nâng cấp dữ liệu hiện tại
+run-codespaces.sh       Chạy server cổng 8000
 ```
 
 ## Nguyên tắc an toàn
 
-- Chỉ dùng credit ảo, không có giá trị quy đổi.
-- Không thêm nạp/rút trước khi có đánh giá pháp lý độc lập.
-- Không cho admin sửa kết quả hoặc số dư trực tiếp.
-- Mọi điều chỉnh credit phải là ledger entry bù trừ.
-- Giữ `APP_DEBUG=false` trên production.
-- Bắt buộc HTTPS, backup, rate limiting, 2FA admin và monitoring khi triển khai thật.
-
-## Nguồn học hỏi
-
-Dự án này được viết mới, không sao chép mã nguồn của các repo tham khảo. Chi tiết nằm trong `docs/OPEN_SOURCE_REFERENCES.md`.
+- Chỉ dùng virtual credits, không có giá trị tiền mặt.
+- Admin không được sửa kết quả hoặc chọn người thắng.
+- Mọi thay đổi số dư phải tạo ledger entry.
+- Không commit `.env`, SQLite, `vendor` hoặc mật khẩu thật.
+- Codespaces chỉ phù hợp phát triển và demo, không phải hosting 24/7.
 
 ## License
 
 MIT. Xem `LICENSE`.
-
-## Chạy không cần cài đặt trên Windows
-
-Repository có sẵn cấu hình `.devcontainer` cho GitHub Codespaces. Xem hướng dẫn trong `CLOUD-RUN.md`. Sau khi Codespace mở, chạy:
-
-```bash
-./run-codespaces.sh
-```

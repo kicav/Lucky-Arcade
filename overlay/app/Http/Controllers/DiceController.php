@@ -28,6 +28,14 @@ class DiceController extends Controller
             ? "You won {$entry->payout} credits. Roll: {$entry->result['roll']}"
             : "You lost. Roll: {$entry->result['roll']}";
 
-        return back()->with('result', $message);
+        return back()->with([
+            'result' => $message,
+            'game_result' => [
+                'game' => $game->code,
+                'won' => (bool) ($entry->result['won'] ?? false),
+                'payout' => $entry->payout,
+                'result' => $entry->result,
+            ],
+        ]);
     }
 }
