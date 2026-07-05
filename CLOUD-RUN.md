@@ -24,7 +24,7 @@ bash run-codespaces.sh
 Hoặc nâng cấp:
 
 ```bash
-bash upgrade-v0.3.sh
+bash upgrade-v0.4.sh
 bash run-codespaces.sh
 ```
 

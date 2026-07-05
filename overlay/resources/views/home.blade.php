@@ -5,7 +5,7 @@
     <div>
         <span class="eyebrow">OPEN-SOURCE SOCIAL GAMING</span>
         <h1>Transparent games with virtual credits.</h1>
-        <p>Play Dice, European Roulette and Coin Flip, inspect your seed hash and verify every historical result after rotating the seed.</p>
+        <p>Play Dice, European Roulette, Coin Flip and High Low, inspect your seed hash and verify every historical result after rotating the seed.</p>
         @auth
             <a class="button" href="{{ route('games.index') }}">Open game lobby</a>
         @else

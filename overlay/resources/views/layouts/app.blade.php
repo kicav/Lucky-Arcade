@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Lucky Arcade')</title>
-    <link rel="stylesheet" href="/css/app.css?v=4">
-    <script src="/js/app.js?v=4" defer></script>
+    <link rel="stylesheet" href="/css/app.css?v=5">
+    <script src="/js/app.js?v=5" defer></script>
 </head>
 <body>
 <header class="topbar">
@@ -17,6 +17,8 @@
         @auth
             <a href="{{ route('dashboard') }}">Dashboard</a>
             <a href="{{ route('fairness.show') }}">Fairness</a>
+            <a href="{{ route('achievements.index') }}">Achievements</a>
+            <a href="{{ route('referrals.index') }}">Referrals</a>
             <a href="{{ route('notifications.index') }}">Notifications @php($unread = auth()->user()->userNotifications()->whereNull('read_at')->count()) @if($unread)<span class="nav-badge">{{ $unread }}</span>@endif</a>
             <a href="{{ route('account.show') }}">Account</a>
             @if(auth()->user()->is_admin)

@@ -1,0 +1,11 @@
+@extends('layouts.app')
+@section('title', 'Admin analytics')
+@section('content')
+<div class="page-head"><div><span class="eyebrow">ADMIN ANALYTICS</span><h1>Platform insights</h1></div><a class="button secondary" href="{{ route('admin.dashboard') }}">Back to overview</a></div>
+<div class="grid stats"><div class="stat"><span>Active players · 14d</span><strong>{{ number_format($activePlayers14d) }}</strong></div><div class="stat"><span>Referral rewards</span><strong>{{ number_format($referralRewards) }}</strong></div><div class="stat"><span>Achievements unlocked</span><strong>{{ number_format($achievementUnlocks) }}</strong></div></div>
+<section class="panel"><h2>Daily activity · last 14 days</h2><div class="bar-chart">@foreach($daily as $day)<div class="bar-column" title="{{ $day['date']->format('Y-m-d') }} · {{ number_format($day['stake']) }} stake"><div class="bar-value">{{ $day['stake'] ? number_format($day['stake']) : '' }}</div><div class="bar" style="height: {{ max(4, (int) round(($day['stake'] / $maxDailyStake) * 180)) }}px"></div><small>{{ $day['date']->format('m/d') }}</small></div>@endforeach</div></section>
+<div class="grid two">
+<section class="panel"><h2>Daily detail</h2><div class="table-wrap"><table><thead><tr><th>Date</th><th>Plays</th><th>Stake</th><th>Payout</th><th>Net</th></tr></thead><tbody>@foreach($daily->reverse() as $day)<tr><td>{{ $day['date']->format('Y-m-d') }}</td><td>{{ number_format($day['plays']) }}</td><td>{{ number_format($day['stake']) }}</td><td>{{ number_format($day['payout']) }}</td><td class="{{ $day['net'] >= 0 ? 'positive' : 'negative' }}">{{ number_format($day['net']) }}</td></tr>@endforeach</tbody></table></div></section>
+<section class="panel"><h2>Game performance · all time</h2><div class="table-wrap"><table><thead><tr><th>Game</th><th>Plays</th><th>Stake</th><th>Net</th><th>RTP</th></tr></thead><tbody>@foreach($gameRows as $row)<tr><td>{{ $row['game']->name }}</td><td>{{ number_format($row['plays']) }}</td><td>{{ number_format($row['stake']) }}</td><td class="{{ $row['net'] >= 0 ? 'positive' : 'negative' }}">{{ number_format($row['net']) }}</td><td>{{ number_format($row['rtp'], 2) }}%</td></tr>@endforeach</tbody></table></div></section>
+</div>
+@endsection

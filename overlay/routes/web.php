@@ -3,6 +3,7 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\AuditLogController as AdminAuditLogController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\AnalyticsController as AdminAnalyticsController;
 use App\Http\Controllers\Admin\EntryController as AdminEntryController;
 use App\Http\Controllers\Admin\GameController as AdminGameController;
 use App\Http\Controllers\Admin\UserActionController as AdminUserActionController;
@@ -15,10 +16,13 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DiceController;
 use App\Http\Controllers\FairnessController;
 use App\Http\Controllers\GameController;
+use App\Http\Controllers\HighLowController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LeaderboardController;
+use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\LedgerExportController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ReferralController;
 use App\Http\Controllers\RouletteController;
 use Illuminate\Support\Facades\Route;
 
@@ -44,6 +48,9 @@ Route::middleware(['auth', 'active'])->group(function (): void {
     Route::put('/account/password', [AccountController::class, 'updatePassword'])->middleware('throttle:5,1')->name('account.password.update');
     Route::put('/account/play-controls', [AccountController::class, 'updatePlayControls'])->name('account.controls.update');
 
+    Route::get('/achievements', AchievementController::class)->name('achievements.index');
+    Route::get('/referrals', ReferralController::class)->name('referrals.index');
+
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
 
@@ -52,6 +59,7 @@ Route::middleware(['auth', 'active'])->group(function (): void {
     Route::post('/games/{game}/dice', [DiceController::class, 'store'])->middleware('throttle:30,1')->name('games.dice.play');
     Route::post('/games/{game}/roulette', [RouletteController::class, 'store'])->middleware('throttle:30,1')->name('games.roulette.play');
     Route::post('/games/{game}/coinflip', [CoinFlipController::class, 'store'])->middleware('throttle:30,1')->name('games.coinflip.play');
+    Route::post('/games/{game}/highlow', [HighLowController::class, 'store'])->middleware('throttle:30,1')->name('games.highlow.play');
 
     Route::get('/fairness', [FairnessController::class, 'show'])->name('fairness.show');
     Route::post('/fairness/rotate', [FairnessController::class, 'rotate'])->middleware('throttle:5,1')->name('fairness.rotate');
@@ -60,6 +68,7 @@ Route::middleware(['auth', 'active'])->group(function (): void {
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function (): void {
     Route::get('/', AdminDashboardController::class)->name('dashboard');
+    Route::get('/analytics', AdminAnalyticsController::class)->name('analytics');
     Route::get('/games', [AdminGameController::class, 'index'])->name('games.index');
     Route::put('/games/{game}', [AdminGameController::class, 'update'])->name('games.update');
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');

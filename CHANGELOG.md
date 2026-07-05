@@ -1,16 +1,22 @@
 # Changelog
 
+## v0.4.0 — Growth, progression and analytics
+
+- Thêm game High Low provably fair với kết quả card, push ở rank 7 và payout 1.98×.
+- Thêm referral code/link cho từng người chơi.
+- Referral chỉ trả thưởng sau lượt chơi đầu tiên của tài khoản được giới thiệu.
+- Mỗi phía nhận 500 credits thông qua ledger bất biến và notification.
+- Thêm 6 achievement có progress, reward ledger và notification.
+- Thêm trang Achievement và Referral.
+- Thêm admin analytics 14 ngày và hiệu suất theo game.
+- Thêm test cho High Low, referral reward, achievement và admin analytics.
+
 ## v0.3.0 — Player controls and operations
 
-- Thêm game Coin Flip dùng HMAC-SHA256 và cơ chế seed hiện có.
-- Thêm trang Account để đổi tên, đổi mật khẩu, đặt giới hạn cược theo ngày và tự loại trừ 1/7/30 ngày.
-- Chặn đặt cược khi tài khoản bị đình chỉ, đang tự loại trừ hoặc vượt giới hạn ngày.
-- Thêm trung tâm thông báo và badge chưa đọc.
-- Tạo thông báo cho daily reward, big win và promotional credits.
-- Admin có trang chi tiết người chơi, đình chỉ/kích hoạt lại và cấp promotional credits qua immutable ledger.
-- Mọi thao tác admin nhạy cảm đều ghi audit log.
-- Thêm tìm kiếm người chơi trong admin.
-- Thêm test cho Coin Flip, play controls và admin promotional grant.
+- Coin Flip provably fair.
+- Account/profile, password, daily stake limit và self-exclusion.
+- Notification center.
+- Admin suspend/reactivate và promotional-credit ledger grants.
 
 ## v0.2.0
 

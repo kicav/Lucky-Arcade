@@ -1,7 +1,9 @@
 {
   "name": "Lucky Arcade Laravel 13",
   "image": "mcr.microsoft.com/devcontainers/php:1-8.3",
-  "forwardPorts": [8000],
+  "forwardPorts": [
+    8000
+  ],
   "portsAttributes": {
     "8000": {
       "label": "Lucky Arcade",
@@ -9,6 +11,6 @@
       "protocol": "http"
     }
   },
-  "postCreateCommand": "chmod +x run-codespaces.sh setup-linux.sh upgrade-v0.3.sh && php -v && composer --version && php -m | grep -Ei 'pdo_sqlite|sqlite3' || true",
+  "postCreateCommand": "chmod +x run-codespaces.sh setup-linux.sh upgrade-v0.4.sh 2>/dev/null || true; php -v && composer --version && php -m | grep -Ei 'pdo_sqlite|sqlite3' || true",
   "remoteUser": "vscode"
 }

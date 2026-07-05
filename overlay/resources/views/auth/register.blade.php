@@ -10,6 +10,8 @@
         <label>Email<input type="email" name="email" value="{{ old('email') }}" required></label>
         <label>Password<input type="password" name="password" required></label>
         <label>Confirm password<input type="password" name="password_confirmation" required></label>
+        <label>Referral code <span class="hint">Optional</span><input type="text" name="referral_code" value="{{ old('referral_code', $referralCode) }}" maxlength="20" autocomplete="off"></label>
+        @if($referralCode)<p class="referral-note">Referral code <strong>{{ $referralCode }}</strong> has been applied. Complete your first game to unlock the welcome reward.</p>@endif
         <button class="button" type="submit">Create account</button>
     </form>
 </div>

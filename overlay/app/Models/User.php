@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -13,7 +14,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $fillable = [
-        'name', 'email', 'password', 'is_admin', 'daily_stake_limit',
+        'name', 'email', 'password', 'is_admin', 'referral_code', 'referred_by_user_id', 'daily_stake_limit',
         'self_excluded_until', 'suspended_at', 'suspension_reason',
     ];
 
@@ -59,6 +60,27 @@ class User extends Authenticatable
     public function userNotifications(): HasMany
     {
         return $this->hasMany(UserNotification::class);
+    }
+
+
+    public function referrer(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'referred_by_user_id');
+    }
+
+    public function referredUsers(): HasMany
+    {
+        return $this->hasMany(self::class, 'referred_by_user_id');
+    }
+
+    public function referralRewards(): HasMany
+    {
+        return $this->hasMany(ReferralReward::class, 'inviter_user_id');
+    }
+
+    public function achievements(): HasMany
+    {
+        return $this->hasMany(UserAchievement::class);
     }
 
     public function isSelfExcluded(): bool

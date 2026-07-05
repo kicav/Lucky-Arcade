@@ -10,8 +10,10 @@ use App\Models\LedgerEntry;
 use App\Models\User;
 use App\Models\UserNotification;
 use App\Models\Wallet;
+use App\Services\AchievementService;
 use App\Services\FairnessSeedService;
 use App\Services\GameEngineRegistry;
+use App\Services\ReferralRewardService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -20,6 +22,8 @@ final class PlaceBetAction
     public function __construct(
         private readonly GameEngineRegistry $engines,
         private readonly FairnessSeedService $seeds,
+        private readonly ReferralRewardService $referrals,
+        private readonly AchievementService $achievements,
     ) {
     }
 
@@ -125,6 +129,9 @@ final class PlaceBetAction
                     ]);
                 }
             }
+
+            $this->referrals->awardForFirstPlay($lockedUser, $wallet, $entry);
+            $this->achievements->evaluateAfterPlay($lockedUser, $wallet);
 
             $seed->increment('nonce');
 

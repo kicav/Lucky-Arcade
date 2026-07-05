@@ -48,6 +48,31 @@
             requestAnimationFrame(() => coin.classList.add('flip-complete'));
         }
 
+
+        const playingCard = document.querySelector('.js-playing-card.card-settled');
+        if (playingCard) {
+            requestAnimationFrame(() => playingCard.classList.add('card-reveal-complete'));
+        }
+
+        document.querySelectorAll('.js-copy').forEach((button) => {
+            button.addEventListener('click', async () => {
+                const target = document.getElementById(button.dataset.copyTarget || '');
+                if (!target) return;
+                const original = button.textContent;
+                try {
+                    await navigator.clipboard.writeText(target.textContent.trim());
+                    button.textContent = 'Copied';
+                } catch (_) {
+                    const range = document.createRange();
+                    range.selectNodeContents(target);
+                    window.getSelection()?.removeAllRanges();
+                    window.getSelection()?.addRange(range);
+                    button.textContent = 'Select and copy';
+                }
+                window.setTimeout(() => { button.textContent = original; }, 1600);
+            });
+        });
+
         const type = document.querySelector('.js-roulette-type');
         const selection = document.querySelector('.js-roulette-selection');
         const hint = document.querySelector('.js-roulette-hint');

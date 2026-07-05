@@ -41,3 +41,24 @@ erDiagram
         string request_id
     }
 ```
+
+## v0.4 additions
+
+```text
+users
+  ├── referral_code (unique)
+  └── referred_by_user_id -> users.id
+
+referral_rewards
+  ├── inviter_user_id -> users.id
+  ├── referred_user_id -> users.id (unique)
+  └── triggered_by_entry_id -> game_entries.id
+
+user_achievements
+  ├── user_id -> users.id
+  ├── code
+  ├── reward
+  └── unlocked_at
+```
+
+Referral rewards are activated only after the referred account settles its first game. Achievement rewards and referral rewards are both written through the wallet ledger.

@@ -4,6 +4,7 @@
 <div class="page-head">
     <div><span class="eyebrow">ADMINISTRATION</span><h1>Operational overview</h1></div>
     <div class="dashboard-actions">
+        <a class="button secondary" href="{{ route('admin.analytics') }}">Analytics</a>
         <a class="button secondary" href="{{ route('admin.games.index') }}">Game settings</a>
         <a class="button secondary" href="{{ route('admin.users.index') }}">Users</a>
         <a class="button secondary" href="{{ route('admin.entries.index') }}">Play history</a>

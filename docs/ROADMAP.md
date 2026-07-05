@@ -1,31 +1,26 @@
 # Roadmap
 
-## Phase 1 — MVP hiện tại
+## Hoàn thành đến v0.4
 
-- Auth, wallet, ledger.
-- Dice và European Roulette.
-- Fairness seed rotation.
-- User/admin dashboard.
-- Audit log cấu hình.
+- Auth, wallet ledger, player/admin dashboard.
+- Dice, European Roulette, Coin Flip và High Low.
+- Provably-fair seed rotation và historical verification.
+- Daily reward, leaderboard, CSV export và wallet reconciliation.
+- Responsible-play controls, notifications và admin player operations.
+- Referral reward có điều kiện first-play.
+- Achievement/progression.
+- Admin analytics.
 
-## Phase 2 — Hoàn thiện kỹ thuật
+## Phase tiếp theo
 
-- Email verification và reset password.
-- 2FA cho admin.
-- Rate limit theo user/IP.
-- Redis queue/cache/lock.
-- Livewire hoặc Vue cho animation.
-- Export ledger CSV.
-- Reconciliation job kiểm tra `wallet.balance` với tổng ledger.
-- OpenTelemetry/Sentry và health checks.
-
-## Phase 3 — Mở rộng social gaming
-
-- Daily reward không quy đổi.
-- Achievement, level và leaderboard.
-- Blackjack, Slots hoặc Keno bằng engine riêng.
-- Referral chỉ thưởng credit ảo, có giới hạn chống abuse.
-- Nội dung đa ngôn ngữ.
+- Xác minh email và reset password.
+- 2FA bắt buộc cho admin.
+- Granular admin roles và permissions.
+- PostgreSQL deployment, Redis queue/cache/lock và backup tự động.
+- Health endpoint, structured logging và error tracking.
+- Browser end-to-end tests và load/concurrency tests.
+- Đa ngôn ngữ Việt/Anh.
+- Tournament bằng credit ảo và leaderboard theo mùa.
 
 ## Không nằm trong roadmap mặc định
 

@@ -60,3 +60,13 @@ Không có API chọn người thắng, sửa kết quả hoặc cập nhật wa
 ## Idempotency
 
 Mỗi lượt chơi cần `request_id` UUID. Cặp `(user_id, request_id)` là duy nhất. Khi trình duyệt gửi lại cùng request, hệ thống trả về game entry cũ và không trừ credit lần hai.
+
+## v0.4 growth services
+
+- `ReferralCodeService`: creates unique player referral codes.
+- `ReferralRewardService`: awards both parties after the referred player's first settled game.
+- `AchievementService`: evaluates progress, unlocks achievements and writes reward ledger entries.
+- `HighLowEngine`: stateless provably-fair game engine registered through `GameEngineRegistry`.
+- `Admin\\AnalyticsController`: read-only operational aggregation for the admin dashboard.
+
+All virtual-credit changes continue to produce immutable ledger entries. Referral and achievement rewards are idempotent through database unique constraints and ledger idempotency keys.
