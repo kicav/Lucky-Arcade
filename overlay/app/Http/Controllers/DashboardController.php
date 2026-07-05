@@ -18,6 +18,8 @@ class DashboardController extends Controller
             'ledger' => $user->ledgerEntries()->latest()->limit(10)->get(),
             'dailyRewardAmount' => ClaimDailyRewardAction::AMOUNT,
             'dailyRewardClaimed' => $user->dailyRewards()->whereDate('reward_date', today())->exists(),
+            'todayStake' => (int) $user->gameEntries()->whereDate('created_at', today())->sum('stake'),
+            'notifications' => $user->userNotifications()->latest()->limit(5)->get(),
         ]);
     }
 }

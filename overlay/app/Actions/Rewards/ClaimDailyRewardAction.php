@@ -6,6 +6,7 @@ use App\Enums\LedgerDirection;
 use App\Models\DailyReward;
 use App\Models\LedgerEntry;
 use App\Models\User;
+use App\Models\UserNotification;
 use App\Models\Wallet;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -55,6 +56,14 @@ final class ClaimDailyRewardAction
                 'reference_type' => DailyReward::class,
                 'reference_id' => $reward->id,
                 'metadata' => ['reward_date' => $today],
+            ]);
+
+            UserNotification::query()->create([
+                'user_id' => $user->id,
+                'type' => 'daily_reward',
+                'title' => 'Daily reward collected',
+                'message' => self::AMOUNT.' virtual credits were added to your wallet.',
+                'data' => ['amount' => self::AMOUNT, 'reward_date' => $today],
             ]);
 
             return $reward;

@@ -36,6 +36,18 @@ class DatabaseSeeder extends Seeder
             ],
         );
 
+        Game::query()->updateOrCreate(
+            ['code' => 'coinflip'],
+            [
+                'name' => 'Coin Flip',
+                'description' => 'Choose heads or tails in a fast provably-fair round.',
+                'enabled' => true,
+                'min_bet' => 10,
+                'max_bet' => 1000,
+                'config' => ['multiplier' => 1.98],
+            ],
+        );
+
         $this->seedUser('Administrator', 'admin@example.com', 'ChangeMe123!', true, 100000);
         $this->seedUser('Demo Player', 'demo@example.com', 'Demo123!', false, 10000);
     }

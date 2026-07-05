@@ -20,7 +20,7 @@ class GameController extends Controller
     public function show(Request $request, Game $game, FairnessSeedService $seeds): View
     {
         abort_unless($game->enabled, 404);
-        abort_unless(in_array($game->code, ['dice', 'roulette'], true), 404);
+        abort_unless(in_array($game->code, ['dice', 'roulette', 'coinflip'], true), 404);
 
         return view('games.'.$game->code, [
             'game' => $game,

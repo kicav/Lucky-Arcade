@@ -8,6 +8,7 @@ use App\Models\Game;
 use App\Models\GameEntry;
 use App\Models\LedgerEntry;
 use App\Models\User;
+use App\Models\UserNotification;
 use App\Models\Wallet;
 use App\Services\FairnessSeedService;
 use App\Services\GameEngineRegistry;
@@ -22,16 +23,9 @@ final class PlaceBetAction
     ) {
     }
 
-    /**
-     * @param array<string, mixed> $bet
-     */
-    public function execute(
-        User $user,
-        Game $game,
-        int $stake,
-        array $bet,
-        string $requestId,
-    ): GameEntry {
+    /** @param array<string, mixed> $bet */
+    public function execute(User $user, Game $game, int $stake, array $bet, string $requestId): GameEntry
+    {
         return DB::transaction(function () use ($user, $game, $stake, $bet, $requestId): GameEntry {
             $existing = GameEntry::query()
                 ->where('user_id', $user->id)
@@ -42,28 +36,25 @@ final class PlaceBetAction
                 return $existing;
             }
 
+            $lockedUser = User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
+            $this->validatePlayer($lockedUser, $stake);
+
             $lockedGame = Game::query()->whereKey($game->id)->lockForUpdate()->firstOrFail();
             $this->validateGame($lockedGame, $stake);
 
-            $wallet = Wallet::query()
-                ->where('user_id', $user->id)
-                ->lockForUpdate()
-                ->firstOrFail();
-
+            $wallet = Wallet::query()->where('user_id', $lockedUser->id)->lockForUpdate()->firstOrFail();
             if ($wallet->balance < $stake) {
-                throw ValidationException::withMessages([
-                    'stake' => 'Insufficient virtual credits.',
-                ]);
+                throw ValidationException::withMessages(['stake' => 'Insufficient virtual credits.']);
             }
 
             $seed = FairnessSeed::query()
-                ->where('user_id', $user->id)
+                ->where('user_id', $lockedUser->id)
                 ->where('active', true)
                 ->lockForUpdate()
                 ->first();
 
             if (! $seed) {
-                $seed = $this->seeds->create($user);
+                $seed = $this->seeds->create($lockedUser);
                 $seed = FairnessSeed::query()->whereKey($seed->id)->lockForUpdate()->firstOrFail();
             }
 
@@ -76,7 +67,7 @@ final class PlaceBetAction
             );
 
             $entry = GameEntry::query()->create([
-                'user_id' => $user->id,
+                'user_id' => $lockedUser->id,
                 'game_id' => $lockedGame->id,
                 'fairness_seed_id' => $seed->id,
                 'stake' => $stake,
@@ -95,13 +86,13 @@ final class PlaceBetAction
             $wallet->save();
 
             LedgerEntry::query()->create([
-                'user_id' => $user->id,
+                'user_id' => $lockedUser->id,
                 'wallet_id' => $wallet->id,
                 'direction' => LedgerDirection::Debit,
                 'amount' => $stake,
                 'balance_after' => $wallet->balance,
                 'type' => 'game_stake',
-                'idempotency_key' => "{$user->id}:{$requestId}:stake",
+                'idempotency_key' => "{$lockedUser->id}:{$requestId}:stake",
                 'reference_type' => GameEntry::class,
                 'reference_id' => $entry->id,
                 'metadata' => ['game' => $lockedGame->code],
@@ -112,23 +103,60 @@ final class PlaceBetAction
                 $wallet->save();
 
                 LedgerEntry::query()->create([
-                    'user_id' => $user->id,
+                    'user_id' => $lockedUser->id,
                     'wallet_id' => $wallet->id,
                     'direction' => LedgerDirection::Credit,
                     'amount' => $outcome->payout,
                     'balance_after' => $wallet->balance,
                     'type' => 'game_payout',
-                    'idempotency_key' => "{$user->id}:{$requestId}:payout",
+                    'idempotency_key' => "{$lockedUser->id}:{$requestId}:payout",
                     'reference_type' => GameEntry::class,
                     'reference_id' => $entry->id,
                     'metadata' => ['game' => $lockedGame->code],
                 ]);
+
+                if ($outcome->payout >= max(500, $stake * 3)) {
+                    UserNotification::query()->create([
+                        'user_id' => $lockedUser->id,
+                        'type' => 'big_win',
+                        'title' => 'Big virtual-credit win',
+                        'message' => "You won {$outcome->payout} credits in {$lockedGame->name}.",
+                        'data' => ['entry_id' => $entry->id, 'game' => $lockedGame->code, 'payout' => $outcome->payout],
+                    ]);
+                }
             }
 
             $seed->increment('nonce');
 
             return $entry->fresh(['game']);
         }, attempts: 3);
+    }
+
+    private function validatePlayer(User $user, int $stake): void
+    {
+        if ($user->isSuspended()) {
+            throw ValidationException::withMessages(['account' => 'This account is suspended.']);
+        }
+
+        if ($user->isSelfExcluded()) {
+            throw ValidationException::withMessages([
+                'account' => 'Self-exclusion is active until '.$user->self_excluded_until->format('Y-m-d H:i').'.',
+            ]);
+        }
+
+        if ($user->daily_stake_limit !== null) {
+            $todayStake = (int) GameEntry::query()
+                ->where('user_id', $user->id)
+                ->whereDate('created_at', today())
+                ->sum('stake');
+
+            if ($todayStake + $stake > $user->daily_stake_limit) {
+                $remaining = max(0, $user->daily_stake_limit - $todayStake);
+                throw ValidationException::withMessages([
+                    'stake' => "Daily stake limit reached. Remaining today: {$remaining} credits.",
+                ]);
+            }
+        }
     }
 
     private function validateGame(Game $game, int $stake): void

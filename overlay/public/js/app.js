@@ -41,6 +41,13 @@
             requestAnimationFrame(() => wheel.classList.add('spin-complete'));
         }
 
+
+
+        const coin = document.querySelector('.js-coin.coin-settled');
+        if (coin) {
+            requestAnimationFrame(() => coin.classList.add('flip-complete'));
+        }
+
         const type = document.querySelector('.js-roulette-type');
         const selection = document.querySelector('.js-roulette-selection');
         const hint = document.querySelector('.js-roulette-hint');

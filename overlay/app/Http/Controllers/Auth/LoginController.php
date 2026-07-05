@@ -29,6 +29,17 @@ class LoginController extends Controller
             ]);
         }
 
+        $user = $request->user();
+        if ($user && ! $user->is_admin && $user->isSuspended()) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            throw ValidationException::withMessages([
+                'email' => 'This account is suspended. Contact an administrator for assistance.',
+            ]);
+        }
+
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard'));

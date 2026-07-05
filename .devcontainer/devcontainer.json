@@ -9,6 +9,6 @@
       "protocol": "http"
     }
   },
-  "postCreateCommand": "chmod +x run-codespaces.sh setup-linux.sh upgrade-v0.2.sh && php -v && composer --version && php -m | grep -Ei 'pdo_sqlite|sqlite3' || true",
+  "postCreateCommand": "chmod +x run-codespaces.sh setup-linux.sh upgrade-v0.3.sh && php -v && composer --version && php -m | grep -Ei 'pdo_sqlite|sqlite3' || true",
   "remoteUser": "vscode"
 }

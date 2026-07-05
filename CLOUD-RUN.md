@@ -1,53 +1,44 @@
-# Chạy Lucky Arcade hoàn toàn trên trình duyệt bằng GitHub Codespaces
+# Chạy trên GitHub Codespaces
 
-## 1. Đưa mã nguồn lên GitHub
+Repository sử dụng image PHP 8.3 chính thức và không cần cài PHP/Composer trên Windows.
 
-1. Tạo một repository mới trên GitHub.
-2. Giải nén gói này trên máy.
-3. Dùng **Add file > Upload files** để tải toàn bộ nội dung bên trong thư mục lên repository.
-4. Bảo đảm `.devcontainer/devcontainer.json` và `.devcontainer/Dockerfile` tồn tại ở thư mục gốc repository.
+## Tạo Codespace
 
-## 2. Tạo môi trường Codespaces
-
-1. Mở repository.
-2. Chọn **Code > Codespaces > Create codespace on main**.
-3. GitHub sẽ tự tạo máy Linux có PHP 8.3, Composer và SQLite.
-
-## 3. Cài và chạy ứng dụng
-
-Trong terminal của Codespaces chạy:
+1. Đảm bảo repository có `.devcontainer/devcontainer.json`.
+2. Chọn **Code → Codespaces → Create codespace on main**.
+3. Kiểm tra:
 
 ```bash
-./run-codespaces.sh
+php -v
+composer --version
+php -m | grep -Ei 'pdo_sqlite|sqlite3'
 ```
 
-Lần đầu, script sẽ tự:
-
-- tạo Laravel 13 trong `lucky-arcade-app`;
-- chép mã nguồn Lucky Arcade;
-- tạo SQLite;
-- chạy migration và seed;
-- chạy kiểm thử;
-- mở web server tại cổng 8000.
-
-Khi cổng 8000 xuất hiện, chọn **Open in Browser**.
-
-## 4. Tài khoản mẫu
-
-- Admin: `admin@example.com` / `ChangeMe123!`
-- Player: `demo@example.com` / `Demo123!`
-
-Đổi mật khẩu admin trước khi cho người khác truy cập.
-
-## 5. Những lần chạy sau
-
-Mở lại Codespace rồi chạy:
+4. Cài mới:
 
 ```bash
-cd lucky-arcade-app
-php artisan serve --host=0.0.0.0 --port=8000
+bash setup-linux.sh
+bash run-codespaces.sh
 ```
 
-## Lưu ý
+Hoặc nâng cấp:
 
-Codespaces phù hợp để lập trình, kiểm thử và trình diễn ngắn hạn. Nó sẽ dừng khi không hoạt động và không thay thế dịch vụ hosting production chạy liên tục.
+```bash
+bash upgrade-v0.3.sh
+bash run-codespaces.sh
+```
+
+## Mở website
+
+Không truy cập `localhost:8000` trên Windows. Mở **PORTS → 8000 → Open in Browser**. Laravel đã được cấu hình tin cậy proxy của Codespaces và tự đặt `APP_URL` theo tên Codespace.
+
+## Lỗi cổng 8000 đang dùng
+
+```bash
+pkill -f "artisan serve" || true
+bash run-codespaces.sh
+```
+
+## Dừng server
+
+Nhấn `Ctrl+C` trong Terminal đang chạy server.

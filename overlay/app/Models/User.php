@@ -12,7 +12,10 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'email', 'password', 'is_admin'];
+    protected $fillable = [
+        'name', 'email', 'password', 'is_admin', 'daily_stake_limit',
+        'self_excluded_until', 'suspended_at', 'suspension_reason',
+    ];
 
     protected $hidden = ['password', 'remember_token'];
 
@@ -22,6 +25,9 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean',
+            'daily_stake_limit' => 'integer',
+            'self_excluded_until' => 'datetime',
+            'suspended_at' => 'datetime',
         ];
     }
 
@@ -48,5 +54,20 @@ class User extends Authenticatable
     public function dailyRewards(): HasMany
     {
         return $this->hasMany(DailyReward::class);
+    }
+
+    public function userNotifications(): HasMany
+    {
+        return $this->hasMany(UserNotification::class);
+    }
+
+    public function isSelfExcluded(): bool
+    {
+        return $this->self_excluded_until !== null && $this->self_excluded_until->isFuture();
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->suspended_at !== null;
     }
 }
