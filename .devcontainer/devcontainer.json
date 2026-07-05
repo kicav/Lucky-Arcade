@@ -1,0 +1,16 @@
+{
+  "name": "Lucky Arcade Laravel 13",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "forwardPorts": [8000],
+  "portsAttributes": {
+    "8000": {
+      "label": "Lucky Arcade",
+      "onAutoForward": "notify",
+      "protocol": "http"
+    }
+  },
+  "postCreateCommand": "chmod +x run-codespaces.sh setup-linux.sh && php -v && composer --version && php -m | grep -Ei 'pdo_sqlite|sqlite3' || true",
+  "remoteUser": "vscode"
+}
